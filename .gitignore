@@ -1,0 +1,25 @@
+# Outputs générés
+posts_output/
+facebook_exports/
+*.png
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.env
+venv/
+env/
+
+# Data
+leaderboard.json
+metrics.json
+posts.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
