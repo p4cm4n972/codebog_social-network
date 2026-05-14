@@ -21,6 +21,56 @@ import argparse
 from datetime import date, timedelta
 from PIL import Image, ImageDraw, ImageFont
 
+import base64, io as _io
+
+EMOJI_B64 = {
+    "heart": "iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAACyElEQVR4nO2d23HbMBBFbzTuwSnIKcCVpoCkoKQK5SdMNBBBLsB9Qvd8yha4uIdLkJiRBBBCCCGEEEIIIYS48cVq4Pv7x11UwO+fZjVIiK5TdVDpZHp4ychUp8pAVyfUYiUiY52XBtCeUIuWiMx13mbfaD0prWNkr3NKgMekNI5Voc7h1pk60K8fn7uvf/32XTrEaJt7hv/IaJ22k+oF3yIUIZ1cVPgbIxLE/zg0KWnwLQIRZ5OLDn9DKkG0BriEL3zvUS1ZwgfktZwKyDSpjb2aqtTZMn0busuVs19zjEIcCsh4Vm081lalzj10O4AM0xWQ+azauL9/3KvU2fubbgcMPFiZjlGIXQEVzqpq9DLVXwOunMEvdvYDwJvJqFuQylsRK/L0uGxy+VHYjFuFdovCpgNaXjBoKXwOCIYCgqGAYCggmH8rMh++fNnuhm7tC8Sex6xvvT8QG9qMuQYEQwHBPAngZciOvWzZAcFQQDC7AngZ0qeXKTsgmK4AdoEeR1myA4I5FMAuuM5ZhuyAYE4FsAvmkWQn6gBKGEf18wEjA5KxrIbWAEo4ZzSj4UWYEvrMZDN1F0QJz8xmMn0bSgn/uZJFia8CyEr4d0W0vIqIdN+W0rKqCIvLrslWxIrrg9WczPaCVpRggelm3CoSLOdhvhtaXYJ1/dyOPsDj5HERULELvGp264BKEjxrdb0EVZLghfsakF2Cd30hi3BWCRF18S7oL1EnRZiATF0QWUtoB2SSEEX4JShaQvTxwwUAcSFEhw8kEQD4h5EhfCCRAE+yhA8kE+ARTKbwgWQCgHwBWZNOAGD4ey0J5aYUAOiHlTF8ILEAQC+0rOEDyQVokDl8oICA7AFeJb0AYF5CBXklBAATv81SIHygkABAHmqV8IFiAoDzcCuFDxQUcES18IGiAioG3aOkAOBZwkpSSrHqZxEIIYSszx+Tjihez5QCQwAAAABJRU5ErkJggg==",
+    "astonished": "iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAEnUlEQVR4nO1dOVJcMRBtKJcTnHIFJ06nyonxUSalfAdfxKmPYghJnfgKpJCQ4EgzGo2WVqs3/dHLYP6XWu+pW8vXArBgiitrA7B4eYT33nc+ffNfPpcGUsjGwpsoLozBEH5ze9ed7uvzQ/MZa0FMMy8RTyEbi5IoVkKoZ2pBegkexFDLKEe8Bekl5MTQEEJFgJR8T8SnSIWQFkE08ZmIT6ElhJgAMfkzEZ8iFkJCBPYEt0J8CikhrrkSAtgu+QCn5eEcKLIJsGXyAyREYHGlYExK/P7+rfre718fObIfBsXOEJJGw9GwACn5rcKUoC0Gh50cIgwJEJNPLVAKaSG47RwVgSxAIP/Hz6/FZ1pk1sjgFmIkr9a7IyKQBKiRTyUuV0guETjTLqVFFeFDrwGnMf9ozChZ4X2uENHKZ/T91M6b2zt4fX6Al0d47xGhS61Sb2fhiF5PQI8DJL9SbRFYvroHYqv219HLD0qAFXr6EHjCeEFTgEU+DVgRuntBJHz+U//933cVM87gwK5qSz1c+1sFTKElhKJdrV5RUYCh2c3eAqaQEsLArtZ3hGYboE4+VxoSaRLSaPGXFYDc5+ckboNp5XjNhiBS7EcYttvtTv5+enpqpzsajpzYVWoLVHpBaQHT/6MKLAAPdp2FIO7aXyok+pmR8OHIrtK4gPWjfApMISnPjsKTXScCkBpfiR4LRx5e7YJTnrMewDHtQKk5Gl5gaVeOV9EQtNDGEsAYBwHWrKcO0t7Q8gBjiAlAGcRoDHy82TUugMYUMiUPr3YlEA1BPTVHczrCk11XAEwN8MCwv1pIwck4S7vC5JzKZFwoCGnWURAe7OLzAAD+4T9XHHdoV/AA3jaAs+G7hLRAohHmMFCiB+PULpk2IBjqbVWEQ7tkG2FsgbXXBTmyS2dhltXCqxYc2LXmgoyxBDCGTghixCxbX7GYRgDs1qXw3CxCuBeAumdsFiGuAY6rtTBnrGmCY8Oe9KY/CuJVcm49oLo390t+FnP/Nz+Jtr9/c+sJh3WKnr4Jl8gvEX/2fkEILyLEHuBOgOxGaCTxZ2llhPAgQiyAq3EAJ/mld721CQcBrBtibvJraViKkC5Td+UBMTjIl0iLGy4EsKiRXkJRVgDr8YBEjfXgBTleTwSwPsj6UhDzbB6CLEOBhzB0JoB1b0gyVFiGodImPXMPuHRUBbBujLeCGo9ZAVZjLAPSUQXLC8bQ4q8owPICXpT4rHqAdY9odmAO8HPXCyrN5XtPm4qmANJeYDk/L5k39vhKlAesUNSHnrNDu0OQhggSoUIr/PTygxZAsldkEYak82Q/OTdOdDYv0K79PZW1OwRJiZCrkRzEaX2Yp56eTuqGziKCd/IBGG/Q4MRM64LMbtAI0BYBoH9lHIBP8gGEb1Eahed7adzcohQgdY/YqAjc5HPfqMfat5e8zK1XCMlaD8A3LpruLkmrHTJSd0mu21QbmO421RjrPuE21o3aCTZ1o3aMdad8HurffUun81qIUZpK0fwebvrh3UIMD6THcLHyAXNmNUUUzGSh9eoPFwKkkLy1z5rwFK6MqYEiijeyc/gP166ChkA7XfoAAAAASUVORK5CYII=",
+    "joy": "iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAEcUlEQVR4nO2dv24UMRDG5yJECtLyBogGiYoyIFHxFulOPEGegg7RoHR5i1RIkJKWBt0b0IYCmlAEJ16f7Z1/3vF551cll9zu+Ptsr9fr9QA4pmysA8Bycw231O+cnPZfvi4D5IiNpTdTuggGI/iTp6/Jx/3969vs/1gbYnrykvAcsbGUTLEyYvGTWoheogczFjtRTngL0UvkzFjCiEUMSMXvSfiU1IjWJjQ9+CEJn7KUEc0MiMU/JOFTYiNamKB+wFGET2llxJHWgQDGFR9gWh7NG0U1A0YWP9DCBJWmFIIZVfgcoUuSdkfiFrBG8QEeyittCSID1ip+QMMEtgFrFz8gNYFlgIs/RWIC2QAXPw/XBJIBLn4djgloA1o+pRoRrF7kLshrfx2qPigDvOuhQemKZg1w8XlgTVCdjHPoVA3w2i8D0woelf6gOeo5e/+3+vfLz4+1TkViybhuruE2N3FXnMmT1v65wpVobYZFXLWZ02wXJK393EJKv9vy2Bpx5XStXgM4tV8j0BYmWMZV0zHbBXG7n1qApSbM+Q6VHuIqdUN7BmiKTw1U4xgtjqkVV84ElfsArQBz39Hut3uIK2ZigNbQU1JrW46Ceokr1jnbAijdT1oTNAJNj8GpbT3GldPVpyKMKd4JY9juruD4/O7nPx/easRzMByffwEAgO0O4OLZO/Zx7q/G1NHPdne195kkkENCWvZ4NMTqgnIB1D4fCe2y+zXAGDfAGDfAmCMAf/CyNPGDGlYLKF3x1zAK0i47uwtKT7gG8QOaZd8AeBdkQbgX8IuwMW6AMeK5oMCargEAemVnt4D01nsN0xABzbL7XBARnwsaDDfAGDfAGJ+KINJkKiKsU8HssVY64RrED0jLHj8RYz+SdPiIH0k6ergBxrSfinj+VXKKPvj5Zu8j9akI6oXYpyLKv9dIF+j6VAQRn4oYjKwBlPsBB09O18lF+OQUNtgl6ula0MsXr/7/9HL6j58IEfbKx4cyXcDdYtizH98n/xLWimJQf0HD4bNnAGY0tKZpByxzmpTeEVNrAWmTHBnNslYNqLUCq7fbe2ROi5qOWQO4e2GuoRVIyoh+Uz7GW0EdSe0HqBjgrWAf7doPgNi6GPOcIPs+7v19wRjkxMfW/lplVhkFZV9kHqglcMTHMmsAdpZ0VBO44mM390b389hHlqWXlw+tSypVHk3xARgGAPBNAOjfiFqrpYgPoGwAAO3B/ex2YJ0ZMdddYvt8al4B8lCTunqidyO0hAfgJXVgjfW1TYhpbQhlYNBafABBChPOOiL2hnlMU7ijMOoQU5LORJT/pMXWZpZobkWGRZzEx2p7Sy1abUeJpassSkuZoXEXq5VFSS0jXMs8Yj1tAqudUU81leHoydxapDNUfSgfBzXa0pZWuSQ9m+oMB5dNNcbzCc/jGbUThsqoHeM55fMsZkCgtPTRwozSQGEJ4QOLGxBjYUYPoseYGhDALAjmmIIZClsJH+jCgJSWWfusBU/pKpgaHFN6EzvHP858bTstmHbXAAAAAElFTkSuQmCC",
+    "fire": "iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAADSUlEQVR4nO1dW07DQBDbIC6GxBm4Ax+cph/cgTMgcTT4WqlUabPztKcdf0JJHHs8swlLGKPRsOD3Y/yiOVjwhCZgwRS/sgllDbgUvaoJG5qAFCtCb6c611UqAatVXikNZQyQilrFhBIGaMWsYAK9AVYR2U2gHVYRwjEOZ8oERFUtYxroDIgWic0EKgOyxGEygcaAbFFYTIAPJQYhkMMZmgAG8cfA8oAZwCL+BIoPxADXi/16dTsUwoR0A0LEL2xC2vBxv7A90d++XU+RMZxTEpAi/q2vK5GRhnAD0sRf/b4Q0SaEGpAuvvRzBKC5Ez6EVNQigznMAIqlZoEk8CfAKqKTCVEpCFlmuZD1rl6HJWrEspQzARGtw+GYESlwN8BMMrJvE84ErgRkCGQ8h3cKXA0wkcusTqIkcCQAIYjhnJ4pcDNATQpZjQRJwCaAQAAtB68UuBigIsMg/gSQC8cMKAqPFJgNKF/9EyBOnQAjrCkwGcC2s6Ei8hPA2H4mACsitQFd/T7oGeAEbUGqDCh517uKZI6dAEdoClNsQPd+X+QloEL7mUh8UioyoKvfHz0DwMgxoFL7mUji/Cz58HYaG7wN/RxsL3nBmi3duiIyAIIjwY8+DzbkCOKNRuIEaKMsFf4IWiOEG7qkCeAcwt7iRx3TAeIWFDoHokWaxw9qS5qti7EJkLSfzAqVnCt4NcTRghDtgaQlxRqwMsCQQqyc2/kP/y6hMsBtmzZDFTpx0GoS34KCKygUCdxxM4Ch+ieAXHIMqJiCJM6YBDBV/wSIk9oA8dCplILgxw/n4LgPeGCYlpOqRxLvljMm4FP+I52AwjAZwPgi1GxYNegEgNEGgNEGgGE24JHngMe1dwLAyDdAsc5OA4CbiwGP2Ia8rtltX9AkBN+4FQzvYnNvQUsEGdvQAqcyL2y6x5YUdU3hQt1sSSwP5m5Uf3Qxha+CKqfhbl5dfPVCGGbBFQ5ZhZNenbstCdWKdsTPTmz6jdjuBSKSQCD+GKBHEXATSMQfA/xPfK6ukKJaErjf754bdeJzpMwFoqr/xwFNYCIsDYRVfw4KEhNLz5GODAE9UtCChsg5wt5UTiT8BOUvZCKEYhS/0Wg0Go1Go9EA4Q+wHjBiPwl2BAAAAABJRU5ErkJggg==",
+}
+
+EMOJI_ORDER = ["heart", "astonished", "joy", "fire"]
+
+def _emoji_img(name, size=80):
+    """Retourne un emoji PIL Image depuis le b64 embarqué."""
+    data = base64.b64decode(EMOJI_B64[name])
+    img  = Image.open(_io.BytesIO(data)).convert("RGBA")
+    return img.resize((size, size), Image.LANCZOS)
+
+def _draw_down_arrow(draw, cx, cy, r, color):
+    """Dessine une flèche bas premium dans un cercle."""
+
+    # Cercle
+    draw.ellipse(
+        [cx-r, cy-r, cx+r, cy+r],
+        outline=color,
+        width=3
+    )
+
+    # Tige verticale
+    draw.line(
+        [(cx, cy-r//3), (cx, cy+r//6)],
+        fill=color,
+        width=4
+    )
+
+    # Pointe gauche
+    draw.line(
+        [(cx-10, cy+2), (cx, cy+r//3)],
+        fill=color,
+        width=4
+    )
+
+    # Pointe droite
+    draw.line(
+        [(cx+10, cy+2), (cx, cy+r//3)],
+        fill=color,
+        width=4
+    )
+
+
+
 # ─────────────────────────────────────────
 # CONFIG
 # ─────────────────────────────────────────
@@ -54,7 +104,7 @@ HOOKS = [
 ]
 
 CTA = {
-    "JS": "💻 Besoin de t'entraîner en JavaScript ? → codeb.org.itmade.fr",
+    "JS": "💻 Besoin de t'entraîner en JavaScript ? → codebog.itmade.fr",
     "ALGO": "🧠 Tu veux progresser en algorithmique ? → learning.itmade.fr"
 }
 
@@ -1322,106 +1372,523 @@ def colorize_line(draw, x, y, line, font, default_color):
         bbox = draw.textbbox((0,0), tok, font=font)
         cx += bbox[2]
 
+def _lf(name, size):
+    """
+    Charge une font avec priorite :
+    1. Dossier courant (si DejaVu telechargees)
+    2. Fonts Windows systeme (toujours disponibles)
+    3. Fonts Linux
+    """
+    W = "C:/Windows/Fonts/"
+    WIN_MAP = {
+        "DejaVuSansMono.ttf":      [W+"consola.ttf",  W+"lucon.ttf",   W+"cour.ttf"],
+        "DejaVuSansMono-Bold.ttf": [W+"consolab.ttf", W+"courbd.ttf"],
+        "DejaVuSans.ttf":          [W+"segoeui.ttf",  W+"arial.ttf",   W+"calibri.ttf"],
+        "DejaVuSans-Bold.ttf":     [W+"segoeuib.ttf", W+"arialbd.ttf", W+"calibrib.ttf"],
+        "seguiemj.ttf":            [W+"seguiemj.ttf"],
+    }
+    LIN = "/usr/share/fonts/truetype/dejavu/"
+    LIN_MAP = {
+        "DejaVuSansMono.ttf":      [LIN+"DejaVuSansMono.ttf"],
+        "DejaVuSansMono-Bold.ttf": [LIN+"DejaVuSansMono-Bold.ttf"],
+        "DejaVuSans.ttf":          [LIN+"DejaVuSans.ttf"],
+        "DejaVuSans-Bold.ttf":     [LIN+"DejaVuSans-Bold.ttf"],
+        "seguiemj.ttf":            [LIN+"DejaVuSans.ttf"],
+    }
+    candidates = [name] + WIN_MAP.get(name, []) + LIN_MAP.get(name, [])
+    for path in candidates:
+        try:
+            return ImageFont.truetype(path, size)
+        except Exception:
+            pass
+    return ImageFont.load_default()
+
+def _draw_hook_two_color(draw, hook, x, y_start, font_w, font_g, accent, base, max_w):
+    """
+    Rend le hook sur plusieurs lignes avec 2 couleurs :
+    - Ligne 1        : blanc
+    - Début ligne 2  : vert (mots accent)
+    - Suite ligne 2+ : blanc
+    """
+    words  = hook.split()
+    n      = len(words)
+    # Zone accent : du tiers au deux-tiers
+    acc_s  = max(1, n // 3)
+    acc_e  = max(acc_s + 1, (2 * n) // 3)
+
+    # Construction des lignes avec wrapping manuel
+    lines, current = [], []
+    for i, w in enumerate(words):
+        current.append((i, w))
+        test = ' '.join(wd for _, wd in current)
+        if draw.textbbox((0,0), test, font=font_w)[2] > max_w and len(current) > 1:
+            lines.append(current[:-1])
+            current = [(i, w)]
+    if current:
+        lines.append(current)
+
+    # Calculer la ligne de base de référence (la plus grande police)
+    baseline_offset = draw.textbbox((0,0), 'Ag', font=font_g)[3]
+
+    y = y_start
+    for li, line in enumerate(lines):
+        cx = x
+        # Position de la baseline pour cette ligne
+        baseline_y = y + baseline_offset
+
+        for wi_abs, (word_idx, word) in enumerate(line):
+            in_accent = (acc_s <= word_idx < acc_e)
+            font  = font_g if in_accent else font_w
+            color = accent if in_accent else base
+
+            # Aligner sur la baseline en utilisant anchor="ls" (left-baseline)
+            draw.text((cx, baseline_y), word, font=font, fill=color, anchor="ls")
+            space = word + ' '
+            cx += draw.textbbox((0,0), space, font=font)[2]
+
+        # Hauteur de ligne = max des deux fonts
+        lh = max(
+            draw.textbbox((0,0), 'Ag', font=font_w)[3],
+            draw.textbbox((0,0), 'Ag', font=font_g)[3]
+        )
+        y += int(lh * 1.12)
+    return y   # y après le hook
+
+def _colorize_token(draw, x, y, token, font):
+    """Rend un token JS avec sa couleur syntaxique, retourne le nouveau x."""
+    KW  = {'function','return','const','let','var','if','else','for','while','do',
+           'true','false','null','undefined','new','class','extends','super','this',
+           'async','await','typeof','instanceof','throw','try','catch','finally',
+           'yield','static','of','in','switch','case','break','continue','from',
+           'import','export','default','get','set','delete','void'}
+    CLS = {'console','Math','Object','Array','Promise','JSON','Number','String',
+           'Boolean','Symbol','Map','Set','WeakMap','WeakSet','Error','Date'}
+    t = token.strip()
+    if not t:
+        x += draw.textbbox((0,0), token, font=font)[2]
+        return x
+    if t.startswith('//'):
+        color = (106, 153, 85)
+    elif t.startswith('"') or t.startswith("'") or t.startswith('`'):
+        color = (206, 145, 120)
+    elif t in KW:
+        color = (197, 134, 192)
+    elif t in CLS:
+        color = (78, 201, 176)
+    elif t.lstrip('-').replace('.','').isdigit():
+        color = (181, 206, 168)
+    else:
+        color = (212, 212, 220)
+    draw.text((x, y), token, font=font, fill=color)
+    x += draw.textbbox((0,0), token, font=font)[2]
+    return x
+
+def _draw_code_line(draw, x_start, y, line, font):
+    import re
+    pat = r'(//[^\n]*|"[^"]*"|\'[^\']*\'|`[^`]*`|\b\w+\b|[^\w\s]|\s+)'
+    for tok in re.findall(pat, line):
+        x_start = _colorize_token(draw, x_start, y, tok, font)
+
 def generate_image(post, output_path):
     """
-    Génère une image 1080x1080 : fenêtre terminal centrée avec SEULEMENT le code.
-    Fond sombre, fenêtre macOS style, code coloré, rien d'autre.
+    Layout identique à l'image de référence :
+    ┌─────────────────────────────────────────────┐
+    │ ⚡ JS CHALLENGE            #001 / 365        │  ← badges
+    │                                             │
+    │ Hook ligne 1              (blanc)            │  ← accroche
+    │ HOOK ACCENT  reste        (vert + blanc)     │
+    │                                             │
+    │ ┌─ Terminal macOS ───────────────────────┐  │  ← terminal
+    │ │ ● ● ●      js.js — codebog            │  │
+    │ │                                       │  │
+    │ │  1  console.log(typeof null)          │  │
+    │ └───────────────────────────────────────┘  │
+    │                                             │
+    │ ❤️  "null"      │  😮  "object"             │  ← options 2×2
+    │ 😂  "undefined" │  🔥  "boolean"            │
+    │                                             │
+    │   ↓  RÉAGIS AVANT DE LIRE LES COMMENTAIRES │  ← CTA bar
+    ├─────────────────────────────────────────────┤
+    │ codebog  🧠 learning.itmade.fr  🎮 codeb…  │  ← footer
+    └─────────────────────────────────────────────┘
     """
-    img = Image.new('RGB', (IMG_W, IMG_H), BG)
-    draw = ImageDraw.Draw(img)
+    W, H   = 1080, 1080
+    img    = Image.new("RGB", (W, H), BG)
+    draw   = ImageDraw.Draw(img)
+    is_js  = post['type'] == 'JS'
+    ACCENT = GREEN if is_js else BLUE
 
-    # Fonts
-    f_code   = get_font(30)
-    f_small  = get_font(20)
-    f_tiny   = get_font(17)
-    f_bold   = get_bold_font(22)
+    # ── Fonts ──────────────────────────────────────────────────────────
+    f_badge   = _lf("DejaVuSansMono.ttf",  26)
+    f_hook_w = _lf("DejaVuSans.ttf", 56)
+    f_hook_g = _lf("DejaVuSans-Bold.ttf", 64)
+    f_tb      = _lf("DejaVuSansMono.ttf",  22)
+    f_lnum    = _lf("DejaVuSansMono.ttf",  56)   # numéro de ligne
+    f_opt     = _lf("DejaVuSansMono.ttf",  28)
+    f_emoji   = _lf("seguiemj.ttf",        52)   # Windows emoji (fallback DejaVu)
+    if str(f_emoji) == str(ImageFont.load_default()):
+        f_emoji = _lf("DejaVuSans.ttf", 52)
+    f_cta     = _lf("DejaVuSansMono.ttf",  24)
+    f_logo    = _lf("DejaVuSans-Bold.ttf", 52)
+    f_foot    = _lf("DejaVuSans.ttf",      20)
 
+    # Code font : adapté au nombre de lignes
     code_lines = post['code'].split('\n')
-    n_lines    = len(code_lines)
+    nl = len(code_lines)
+    code_sz = 64 if nl == 1 else (52 if nl <= 3 else (40 if nl <= 6 else 30))
+    f_code = _lf("DejaVuSansMono.ttf", code_sz)
 
-    # ── Dimensions de la fenêtre terminal ─────────
-    PAD_X    = 50        # padding horizontal du code dans la fenêtre
-    PAD_Y    = 24        # padding vertical du code
-    LINE_H   = 40        # hauteur d'une ligne de code
-    TITLEBAR_H = 44      # hauteur de la barre macOS
+    M  = 32   # marge gauche/droite
 
-    # Largeur max d'une ligne de code
-    max_line_w = max(
-        draw.textbbox((0,0), line, font=f_code)[2]
-        for line in code_lines
-    ) if code_lines else 400
+    # ══════════════════════════════════════════════
+    # 1. BADGES (y: 34 → 102)
+    # ══════════════════════════════════════════════
+    badge_l = "JS CHALLENGE" if is_js else "ALGO CHALLENGE"
+    badge_r = f"#{post['day']:03d} / 365"
+    badge_l_em = "[JS]" if is_js else "[ALGO]"  # fallback sans emoji
 
-    WIN_W = min(max(max_line_w + PAD_X * 2, 500), IMG_W - 80)
-    WIN_H = TITLEBAR_H + PAD_Y + n_lines * LINE_H + PAD_Y
+    # Badge gauche
+    bb_l = draw.textbbox((0,0), badge_l, font=f_badge)
+    bw_l = bb_l[2] + 40
+    draw.rounded_rectangle((M, 34, M+bw_l, 102), radius=18, outline=ACCENT, width=2)
+    draw.text((M+20, 52), badge_l, font=f_badge, fill=ACCENT)
 
-    # Centrage de la fenêtre
-    WIN_X = (IMG_W - WIN_W) // 2
-    WIN_Y = (IMG_H - WIN_H) // 2
+    # Badge droit
+    bb_r = draw.textbbox((0,0), badge_r, font=f_badge)
+    bw_r = bb_r[2] + 40
+    draw.rounded_rectangle((W-M-bw_r, 34, W-M, 102), radius=18, outline=ACCENT, width=2)
+    draw.text((W-M-bw_r+20, 52), badge_r, font=f_badge, fill=ACCENT)
 
-    # ── Ombre de la fenêtre ────────────────────────
-    SHADOW = 18
-    draw.rounded_rectangle(
-        [(WIN_X + SHADOW, WIN_Y + SHADOW), (WIN_X + WIN_W + SHADOW, WIN_Y + WIN_H + SHADOW)],
-        radius=14,
-        fill=(5, 5, 6)
+    # ══════════════════════════════════════════════
+    # 2. HOOK — mesure d'abord, dessine ensuite
+    # ══════════════════════════════════════════════
+
+    # Mesure la hauteur du hook sur une image fantôme
+    _img_tmp  = Image.new("RGB", (W, H), BG)
+    _draw_tmp = ImageDraw.Draw(_img_tmp)
+    hook_bottom = _draw_hook_two_color(
+        _draw_tmp, post['hook'],
+        x=M, y_start=118,
+        font_w=f_hook_w, font_g=f_hook_g,
+        accent=ACCENT, base=WHITE,
+        max_w=W - M * 2 - 60  # Marge de sécurité pour éviter les lettres coupées
+    )
+    del _img_tmp, _draw_tmp
+
+    # ── Calcul des hauteurs fixes sous le terminal ──
+    GAP_HOOK_TERM = 20
+    OH   = 100                        # hauteur d'une option
+    OG   = 16                         # gap entre options
+    CTA_H = 72
+    FOOT_H = 78                       # séparateur + footer
+    FIXED_BELOW = (2*OH + OG) + GAP_HOOK_TERM + CTA_H + FOOT_H + 30
+
+    # ── Espace disponible pour le terminal ──────────
+    term_top     = hook_bottom + GAP_HOOK_TERM
+    available_th = H - term_top - FIXED_BELOW          # pixels dispo pour terminal
+    available_th = max(available_th, 160)               # plancher de sécurité
+
+    # ── Taille de police : remplit la zone code ─────
+    TB_H    = 78                                        # titlebar fixe
+    PAD_V   = 28                                        # padding haut/bas code
+    code_area_available = available_th - TB_H - 2 * PAD_V
+    line_h  = max(30, code_area_available // nl)        # hauteur par ligne
+    code_sz = min(64, max(22, int(line_h * 0.80)))      # taille de police clampée
+    f_code  = _lf("DejaVuSansMono.ttf", code_sz)
+
+    # Recalcul de la hauteur réelle avec la taille de police choisie
+    real_line_h   = int(code_sz * 1.38)
+    total_code_h  = nl * real_line_h
+    TH            = TB_H + 2 * PAD_V + total_code_h    # terminal s'adapte au code
+
+    # ── Dessin du hook (pour de vrai) ───────────────
+    _draw_hook_two_color(
+        draw, post['hook'],
+        x=M, y_start=118,
+        font_w=f_hook_w, font_g=f_hook_g,
+        accent=ACCENT, base=WHITE,
+        max_w=W - M * 2 - 60  # Marge de sécurité pour éviter les lettres coupées
     )
 
-    # ── Corps de la fenêtre ────────────────────────
-    draw.rounded_rectangle(
-        [(WIN_X, WIN_Y), (WIN_X + WIN_W, WIN_Y + WIN_H)],
-        radius=14,
-        fill=CODEBG,
-        outline=(48, 48, 52),
-        width=1
-    )
+    # ══════════════════════════════════════════════
+    # 3. TERMINAL — taille adaptée au code
+    # ══════════════════════════════════════════════
+    tx, ty = M, term_top
+    tw = W - M * 2
 
-    # ── Titlebar macOS ─────────────────────────────
-    draw.rounded_rectangle(
-        [(WIN_X, WIN_Y), (WIN_X + WIN_W, WIN_Y + TITLEBAR_H)],
-        radius=14,
-        fill=(30, 30, 32)
-    )
-    # Couvrir les coins bas de la titlebar (pour que le bas soit droit)
-    draw.rectangle(
-        [(WIN_X, WIN_Y + TITLEBAR_H - 14), (WIN_X + WIN_W, WIN_Y + TITLEBAR_H)],
-        fill=(30, 30, 32)
-    )
-    # Séparateur titlebar / code
-    draw.line(
-        [(WIN_X, WIN_Y + TITLEBAR_H), (WIN_X + WIN_W, WIN_Y + TITLEBAR_H)],
-        fill=(48, 48, 52), width=1
-    )
+    # Fond terminal
+    draw.rounded_rectangle((tx, ty, tx+tw, ty+TH),
+                            radius=26, fill=(10,10,12),
+                            outline=(48,48,58), width=2)
+    # Titlebar
+    draw.rounded_rectangle((tx, ty, tx+tw, ty+TB_H),
+                            radius=26, fill=(16,16,18))
+    draw.rectangle((tx, ty+TB_H-26, tx+tw, ty+TB_H), fill=(16,16,18))
+    draw.line((tx, ty+TB_H, tx+tw, ty+TB_H), fill=(40,40,48), width=1)
 
     # Traffic lights
-    DOT_R = 8
-    DOT_Y  = WIN_Y + TITLEBAR_H // 2
-    for i, color in enumerate([RED, YELLOW, GREEN]):
-        cx = WIN_X + 22 + i * 26
-        draw.ellipse([(cx - DOT_R, DOT_Y - DOT_R), (cx + DOT_R, DOT_Y + DOT_R)], fill=color)
+    for i, col in enumerate([RED, YELLOW, GREEN]):
+        cx = tx + 28 + i * 38
+        cy = ty + TB_H // 2
+        draw.ellipse((cx-14, cy-14, cx+14, cy+14), fill=col)
 
-    # Titre centré dans la titlebar
-    title = f"{post['type'].lower()}.js — codebog #{post['day']:03d}"
-    tbbox = draw.textbbox((0,0), title, font=f_small)
-    tx = WIN_X + (WIN_W - tbbox[2]) // 2
-    draw.text((tx, WIN_Y + (TITLEBAR_H - tbbox[3]) // 2), title, font=f_small, fill=(100, 100, 108))
+    # Titre centré
+    tt  = "js.js — codebog" if is_js else "algo.js — codebog"
+    ttb = draw.textbbox((0, 0), tt, font=f_tb)
+    draw.text((tx + (tw - ttb[2]) // 2, ty + (TB_H - ttb[3]) // 2),
+              tt, font=f_tb, fill=(110, 110, 120))
 
-    # ── Code ──────────────────────────────────────
-    cy = WIN_Y + TITLEBAR_H + PAD_Y
-    for line in code_lines:
-        colorize_line(draw, WIN_X + PAD_X, cy, line, f_code, (212, 212, 220))
+    # Liseré accent gauche
+    draw.rectangle((tx, ty+TB_H, tx+12, ty+TH), fill=ACCENT)
+
+    # Code centré verticalement dans la zone code
+    code_y_start = ty + TB_H + PAD_V
+
+    # Numéro de ligne
+    f_lnum_dyn = _lf("DejaVuSansMono.ttf", code_sz)
+    # Espacement amélioré entre numéros de ligne et code
+    code_x = tx + 95 if nl > 1 else tx + 100
+
+    if nl == 1:
+        draw.text((tx + 28, code_y_start), "1",
+                  font=f_lnum_dyn, fill=(85, 85, 98))
+
+    for i, line in enumerate(code_lines):
+        cy_line = code_y_start + i * real_line_h
+        if nl > 1:
+            # Position des numéros de ligne avec alignement à droite
+            line_num = str(i + 1)
+            f_lnum = _lf("DejaVuSansMono.ttf", max(14, code_sz - 10))
+            num_bbox = draw.textbbox((0, 0), line_num, font=f_lnum)
+            num_width = num_bbox[2]
+            # Aligner à droite les numéros (position fixe à droite avant le code)
+            draw.text((tx + 75 - num_width, cy_line),
+                      line_num,
+                      font=f_lnum,
+                      fill=(75, 75, 88))
+        _draw_code_line(draw, code_x, cy_line, line, f_code)
+
+    # ══════════════════════════════════════════════
+    # 4. OPTIONS 2×2
+    # ══════════════════════════════════════════════
+    opts     = list(post['options'].items())
+    oy_start = ty + TH + GAP_HOOK_TERM
+    OW       = (W - M*2 - 18) // 2
+
+    EMJ_SIZE = OH - 20
+    for i, (emoji, label) in enumerate(opts):
+        col = i % 2
+        row = i // 2
+        ox  = M + col * (OW + 18)
+        oy  = oy_start + row * (OH + OG)
+        draw.rounded_rectangle((ox, oy, ox+OW, oy+OH),
+                                radius=18, fill=(12,12,16),
+                                outline=(48,48,58), width=2)
+        # Emoji PNG embarqué
+        emj = _emoji_img(EMOJI_ORDER[i], size=EMJ_SIZE)
+        img.paste(emj, (ox + 14, oy + (OH - EMJ_SIZE)//2), emj)
+        draw.text((ox + 14 + EMJ_SIZE + 16, oy + (OH - 32)//2), label,
+                  font=f_opt, fill=(220,220,225))
+
+    # ══════════════════════════════════════════════
+    # 5. CTA BAR
+    # ══════════════════════════════════════════════
+    cta_y = oy_start + 2*OH + OG + 14
+    draw.rounded_rectangle((M, cta_y, W-M, cta_y+CTA_H),
+                            radius=18, outline=ACCENT, width=2)
+
+    # Flèche dessinée (cercle + triangle)
+    _draw_down_arrow(draw, M + 62, cta_y + CTA_H//2, 26, ACCENT)
+
+    # "RÉAGIS" en vert + reste en blanc
+    cta_txt_x = M + 100
+    cta_mid_y = cta_y + (CTA_H - draw.textbbox((0,0),"A",font=f_cta)[3]) // 2
+    draw.text((cta_txt_x, cta_mid_y), "RÉAGIS ", font=f_cta, fill=ACCENT)
+    rx = cta_txt_x + draw.textbbox((0,0), "RÉAGIS ", font=f_cta)[2]
+    draw.text((rx, cta_mid_y), "AVANT DE LIRE LES COMMENTAIRES !",
+              font=f_cta, fill=WHITE)
+
+    # ══════════════════════════════════════════════
+    # 6. FOOTER 3 colonnes
+    # ══════════════════════════════════════════════
+    sep_y  = cta_y + CTA_H + 14
+    draw.line((M, sep_y, W-M, sep_y), fill=(22,60,35), width=1)
+    fy = sep_y + 14
+
+    # Colonne gauche : logo codebog
+    draw.text((M, fy), "code", font=f_logo, fill=WHITE)
+    cw = draw.textbbox((0,0), "code", font=f_logo)[2]
+    draw.text((M + cw, fy), "bog", font=f_logo, fill=ACCENT)
+
+    # Colonne centre : learning
+    cx = W // 2 - 100
+    draw.text((cx, fy), "🧠", font=_lf("DejaVuSans.ttf", 26), fill=WHITE)
+    draw.text((cx + 36, fy), "Apprends. Pratique. Progresse.",
+              font=_lf("DejaVuSans.ttf", 18), fill=(200,200,205))
+    draw.text((cx + 36, fy + 26), "learning.itmade.fr",
+              font=_lf("DejaVuSans.ttf", 18), fill=GREEN)
+
+    # Colonne droite : codebog
+    rx2 = W - M - 240
+    draw.text((rx2, fy), "🎮", font=_lf("DejaVuSans.ttf", 26), fill=WHITE)
+    play_lbl = "Entraîne-toi en JS" if is_js else "Entraîne-toi en Algo"
+    draw.text((rx2 + 36, fy), play_lbl,
+              font=_lf("DejaVuSans.ttf", 18), fill=(200,200,205))
+    draw.text((rx2 + 36, fy + 26), "codebog.itmade.fr",
+              font=_lf("DejaVuSans.ttf", 18), fill=BLUE)
+
+    img.save(output_path, "PNG", quality=95)
+    return output_path
+
+def generate_image_DISABLED(post, output_path):
+    """Ancienne version (désactivée)."""
+    img  = Image.new('RGB', (IMG_W, IMG_H), BG)
+    draw = ImageDraw.Draw(img)
+
+    is_js       = post['type'] == 'JS'
+    ACCENT      = GREEN if is_js else BLUE
+    ACCENT_DIM  = (ACCENT[0]//5, ACCENT[1]//5, ACCENT[2]//5)
+
+    # ── Fonts ──────────────────────────────────────
+    f_hook   = get_bold_font(34)
+    f_code   = get_font(26)
+    f_option = get_font(24)
+    f_label  = get_font(19)
+    f_small  = get_font(18)
+    f_tiny   = get_font(16)
+    f_brand  = get_bold_font(38)
+
+    MARGIN   = 50   # marge gauche/droite
+    y        = 52   # curseur vertical
+
+    # ── Badge type (haut droite) ───────────────────
+    badge = f"{'⚡ JS' if is_js else '🧠 ALGO'}  #{post['day']:03d}"
+    bbbox = draw.textbbox((0,0), badge, font=f_small)
+    bx    = IMG_W - bbbox[2] - MARGIN
+    draw.rounded_rectangle(
+        [(bx-10, y-4), (bx + bbbox[2]+10, y + bbbox[3]+4)],
+        radius=20, fill=ACCENT_DIM, outline=(*ACCENT, 80), width=1
+    )
+    draw.text((bx, y), badge, font=f_small, fill=ACCENT)
+
+    # ── Hook ──────────────────────────────────────
+    import textwrap as tw
+    hook_lines = tw.wrap(post['hook'], width=44)
+    for line in hook_lines[:2]:
+        draw.text((MARGIN, y), line, font=f_hook, fill=WHITE)
+        y += 44
+    y += 14
+
+    # ── Séparateur fin ─────────────────────────────
+    draw.line([(MARGIN, y), (IMG_W - MARGIN, y)], fill=(40,40,45), width=1)
+    y += 18
+
+    # ── Fenêtre terminal ───────────────────────────
+    code_lines  = post['code'].split('\n')
+    n_lines     = len(code_lines)
+    LINE_H      = 34
+    PAD_X       = 52
+    PAD_Y       = 18
+    TITLEBAR_H  = 40
+    WIN_W       = IMG_W - MARGIN * 2
+    WIN_H       = TITLEBAR_H + PAD_Y + n_lines * LINE_H + PAD_Y
+
+    # Ombre
+    draw.rounded_rectangle(
+        [(MARGIN+8, y+8), (MARGIN + WIN_W+8, y + WIN_H+8)],
+        radius=14, fill=(4,4,5)
+    )
+    # Corps
+    draw.rounded_rectangle(
+        [(MARGIN, y), (MARGIN + WIN_W, y + WIN_H)],
+        radius=14, fill=CODEBG, outline=(44,44,48), width=1
+    )
+    # Titlebar
+    draw.rounded_rectangle(
+        [(MARGIN, y), (MARGIN + WIN_W, y + TITLEBAR_H)],
+        radius=14, fill=(26,26,28)
+    )
+    draw.rectangle(
+        [(MARGIN, y + TITLEBAR_H - 14), (MARGIN + WIN_W, y + TITLEBAR_H)],
+        fill=(26,26,28)
+    )
+    draw.line(
+        [(MARGIN, y + TITLEBAR_H), (MARGIN + WIN_W, y + TITLEBAR_H)],
+        fill=(44,44,50), width=1
+    )
+    # Traffic lights
+    DOT_CY = y + TITLEBAR_H // 2
+    for i, col in enumerate([RED, YELLOW, GREEN]):
+        cx = MARGIN + 18 + i * 22
+        draw.ellipse([(cx-7, DOT_CY-7), (cx+7, DOT_CY+7)], fill=col)
+    # Titre titlebar
+    tb_title = f"{post['type'].lower()}.js — codebog"
+    tbb = draw.textbbox((0,0), tb_title, font=f_tiny)
+    draw.text(
+        (MARGIN + (WIN_W - tbb[2])//2, y + (TITLEBAR_H - tbb[3])//2),
+        tb_title, font=f_tiny, fill=(80,80,88)
+    )
+    # Liseré accent gauche
+    draw.rectangle(
+        [(MARGIN, y + TITLEBAR_H), (MARGIN + 3, y + WIN_H)],
+        fill=ACCENT
+    )
+
+    # Code coloré + numéros de lignes
+    cy = y + TITLEBAR_H + PAD_Y
+    for i, line in enumerate(code_lines):
+        # Numéro de ligne
+        draw.text((MARGIN + 12, cy), str(i+1), font=f_tiny, fill=(55,55,62))
+        # Code
+        colorize_line(draw, MARGIN + PAD_X, cy, line, f_code, (210,210,218))
         cy += LINE_H
 
-    # ── Numéros de lignes (optionnel, style IDE) ──
-    cy2 = WIN_Y + TITLEBAR_H + PAD_Y
-    for i in range(n_lines):
-        num = str(i + 1)
-        draw.text((WIN_X + 8, cy2), num, font=f_tiny, fill=(60, 60, 68))
-        cy2 += LINE_H
+    y += WIN_H + 22
 
-    # ── Watermark discret en bas ───────────────────
-    wm = "codebog · facebook.com/codebog"
-    wbbox = draw.textbbox((0,0), wm, font=f_tiny)
-    draw.text(((IMG_W - wbbox[2]) // 2, IMG_H - 32), wm, font=f_tiny, fill=(38, 38, 42))
+    # ── Options de vote (grille 2x2) ───────────────
+    opts        = list(post['options'].items())
+    OPT_W       = (IMG_W - MARGIN*2 - 12) // 2
+    OPT_H       = 56
+    for i, (emoji, label) in enumerate(opts):
+        col = i % 2
+        row = i // 2
+        ox  = MARGIN + col * (OPT_W + 12)
+        oy  = y + row * (OPT_H + 10)
+        # Fond
+        draw.rounded_rectangle(
+            [(ox, oy), (ox + OPT_W, oy + OPT_H)],
+            radius=12, fill=(18,18,20), outline=(42,42,48), width=1
+        )
+        # Emoji + label
+        draw.text((ox + 14, oy + 14), emoji, font=f_option, fill=WHITE)
+        ebb = draw.textbbox((0,0), emoji, font=f_option)
+        draw.text((ox + 14 + ebb[2] + 10, oy + 16), label, font=f_label, fill=(160,160,172))
+
+    y += 2 * OPT_H + 10 + 20
+
+    # ── Séparateur ─────────────────────────────────
+    draw.line([(MARGIN, y), (IMG_W - MARGIN, y)], fill=(35,35,40), width=1)
+    y += 18
+
+    # ── Footer ─────────────────────────────────────
+    # Timer
+    timer_txt = "⏱  10 sec · Réagis avant de lire les commentaires 👇"
+    draw.text((MARGIN, y), timer_txt, font=f_small, fill=(70,70,78))
+    y += 30
+
+    # Branding codebog + CTA
+    draw.text((MARGIN, y), "code", font=f_brand, fill=(220,220,228))
+    bbb = draw.textbbox((0,0), "code", font=f_brand)
+    draw.text((MARGIN + bbb[2], y), "bog", font=f_brand, fill=ACCENT)
+    bbb2 = draw.textbbox((0,0), "bog", font=f_brand)
+
+    cta = post.get('cta', '👉 codebog.itmade.fr')
+    draw.text((MARGIN + bbb[2] + bbb2[2] + 24, y + 8), cta, font=f_small, fill=(80,80,88))
+
+    # Phase
+    phase_txt = f"Phase {post['phase']} / 4"
+    ptb = draw.textbbox((0,0), phase_txt, font=f_tiny)
+    draw.text((IMG_W - MARGIN - ptb[2], y + 10), phase_txt, font=f_tiny, fill=(50,50,56))
 
     img.save(output_path, 'PNG', quality=95)
     return output_path
@@ -1703,3 +2170,514 @@ def analyze_top_posts(metrics_path="metrics.json"):
 
     return ranked[:10]
 
+
+
+
+# ─────────────────────────────────────────
+# UX UPGRADE V6
+# ─────────────────────────────────────────
+
+PROGRESSION_TOTAL = 365
+
+REACTIONS = [
+    ("❤️", RED),
+    ("😮", BLUE),
+    ("😂", YELLOW),
+    ("🔥", GREEN),
+]
+
+def generate_compact_post(topic, day_number=1):
+    ttype, short, hook, snippet, options, correct_idx, answer, explanation, tip = topic
+
+    return f"""⚡ Codebog #{day_number:03d}
+
+👇 Vote avec une réaction"""
+
+def render_reaction(draw, x, y, emoji, label, font, emoji_font=None):
+    if emoji_font:
+        draw.text((x, y), emoji, font=emoji_font, fill=WHITE)
+        draw.text((x + 55, y), label, font=font, fill=(220,220,220))
+    else:
+        draw.text((x, y), f"{emoji}  {label}", font=font, fill=(220,220,220))
+
+def generate_apple_terminal_image(
+    title,
+    code_snippet,
+    options=None,
+    hook=None,
+    output_path="output.png",
+    day_number=1
+):
+
+    width, height = 1080, 1080
+
+    img = Image.new("RGB", (width, height), BG)
+    draw = ImageDraw.Draw(img)
+
+    try:
+        hook_font = ImageFont.truetype("DejaVuSansMono.ttf", 30)
+        code_font = ImageFont.truetype("DejaVuSansMono.ttf", 56)
+        option_font = ImageFont.truetype("DejaVuSans.ttf", 30)
+        small_font = ImageFont.truetype("DejaVuSans.ttf", 24)
+        logo_font = ImageFont.truetype("DejaVuSans.ttf", 42)
+        emoji_font = ImageFont.truetype("DejaVuSans.ttf", 32)
+    except:
+        hook_font = ImageFont.load_default()
+        code_font = ImageFont.load_default()
+        option_font = ImageFont.load_default()
+        small_font = ImageFont.load_default()
+        logo_font = ImageFont.load_default()
+        emoji_font = None
+
+    margin = 28
+
+    # Hook
+    if hook:
+        draw.text(
+            (50, 45),
+            hook,
+            fill=WHITE,
+            font=hook_font
+        )
+
+    badge = f"⚡ JS #{day_number:03d}"
+
+    badge_bbox = draw.textbbox((0,0), badge, font=small_font)
+
+    bw = badge_bbox[2] - badge_bbox[0] + 28
+    bh = badge_bbox[3] - badge_bbox[1] + 14
+
+    bx = width - bw - 40
+    by = 40
+
+    draw.rounded_rectangle(
+        (bx, by, bx+bw, by+bh),
+        radius=14,
+        outline=GREEN,
+        width=2
+    )
+
+    draw.text(
+        (bx + 14, by + 7),
+        badge,
+        fill=GREEN,
+        font=small_font
+    )
+
+    # Terminal
+    terminal_x = margin
+    terminal_y = 120
+    terminal_w = width - margin * 2
+    terminal_h = 520
+
+    draw.rounded_rectangle(
+        (terminal_x, terminal_y, terminal_x + terminal_w, terminal_y + terminal_h),
+        radius=26,
+        fill=CODEBG,
+        outline=(35,35,40),
+        width=2
+    )
+
+    titlebar_h = 58
+
+    draw.rounded_rectangle(
+        (terminal_x, terminal_y, terminal_x + terminal_w, terminal_y + titlebar_h),
+        radius=26,
+        fill=TITLEBAR
+    )
+
+    dots = [
+        (RED, terminal_x + 22),
+        (YELLOW, terminal_x + 50),
+        (GREEN, terminal_x + 78),
+    ]
+
+    for color, x in dots:
+        draw.ellipse((x, terminal_y + 18, x + 16, terminal_y + 34), fill=color)
+
+    draw.text(
+        (terminal_x + terminal_w/2 - 70, terminal_y + 16),
+        "codebog",
+        fill=GRAY,
+        font=small_font
+    )
+
+    # Code huge
+    code_y = terminal_y + 120
+
+    wrapped = textwrap.fill(code_snippet, width=20)
+
+    draw.multiline_text(
+        (terminal_x + 50, code_y),
+        wrapped,
+        fill=WHITE,
+        font=code_font,
+        spacing=24
+    )
+
+    # Options
+    options_y = 690
+
+    if options:
+        box_w = 470
+        box_h = 86
+        gap = 18
+
+        positions = [
+            (50, options_y),
+            (560, options_y),
+            (50, options_y + box_h + gap),
+            (560, options_y + box_h + gap),
+        ]
+
+        for i, opt in enumerate(options[:4]):
+            x, y = positions[i]
+
+            draw.rounded_rectangle(
+                (x, y, x + box_w, y + box_h),
+                radius=18,
+                outline=(45,45,55),
+                width=2,
+                fill=(14,14,18)
+            )
+
+            render_reaction(
+                draw,
+                x + 18,
+                y + 22,
+                REACTIONS[i][0],
+                opt,
+                option_font,
+                emoji_font
+            )
+
+    # Bottom separator
+    draw.line(
+        (50, 920, 1030, 920),
+        fill=(28,28,35),
+        width=1
+    )
+
+    # Footer
+    draw.text(
+        (50, 940),
+        "⏱️ 10 sec • Réagis avant de lire les commentaires",
+        fill=GRAY,
+        font=small_font
+    )
+
+    draw.text(
+        (50, 985),
+        "code",
+        fill=WHITE,
+        font=logo_font
+    )
+
+    draw.text(
+        (160, 985),
+        "bog",
+        fill=GREEN,
+        font=logo_font
+    )
+
+    draw.text(
+        (260, 995),
+        "• learning.itmade.fr",
+        fill=DIMGRAY,
+        font=small_font
+    )
+
+    draw.text(
+        (920, 995),
+        f"{day_number}/{PROGRESSION_TOTAL}",
+        fill=DIMGRAY,
+        font=small_font
+    )
+
+    img.save(output_path)
+
+def export_facebook_package(topic, day_number=1, output_dir="facebook_exports"):
+    os.makedirs(output_dir, exist_ok=True)
+
+    filename = topic[1].replace(" ", "_").replace("/", "_").lower()
+
+    txt_path = os.path.join(output_dir, f"{filename}.txt")
+
+    with open(txt_path, "w", encoding="utf-8") as f:
+        f.write(generate_compact_post(topic, day_number))
+
+    img_path = os.path.join(output_dir, f"{filename}.png")
+
+    generate_apple_terminal_image(
+        title=BADGES.get(topic[0]),
+        code_snippet=topic[3],
+        options=topic[4],
+        hook=topic[2],
+        output_path=img_path,
+        day_number=day_number
+    )
+
+    return {
+        "text": txt_path,
+        "image": img_path
+    }
+
+
+# =========================================================
+# ACTIVE RENDER ENGINE V6
+# =========================================================
+
+ACTIVE_RENDER_VERSION = "V6_SOCIAL_UX"
+
+def generate_post_image(topic, day_number=1, output_dir="facebook_exports"):
+    """
+    Main active renderer used by the generator.
+    """
+    os.makedirs(output_dir, exist_ok=True)
+
+    filename = topic[1].replace(" ", "_").replace("/", "_").lower()
+
+    img_path = os.path.join(output_dir, f"{filename}.png")
+
+    generate_apple_terminal_image(
+        title=BADGES.get(topic[0]),
+        code_snippet=topic[3],
+        options=topic[4],
+        hook=topic[2],
+        output_path=img_path,
+        day_number=day_number
+    )
+
+    return img_path
+
+print("✅ ACTIVE RENDER ENGINE:", ACTIVE_RENDER_VERSION)
+
+
+
+
+
+# =========================================================
+# CODEBOG PREMIUM SOCIAL RENDERER
+# =========================================================
+
+PROGRESSION_TOTAL = 365
+
+REACTION_EMOJIS = ["❤️", "😮", "😂", "🔥"]
+
+def load_font(name, size):
+    try:
+        return ImageFont.truetype(name, size)
+    except:
+        return ImageFont.load_default()
+
+def generate_premium_post_image(topic, day_number=1, output_path="premium.png"):
+    ttype, short, hook, snippet, options, correct_idx, answer, explanation, tip = topic
+
+    width, height = 1080, 1080
+
+    img = Image.new("RGB", (width, height), BG)
+    draw = ImageDraw.Draw(img)
+
+    # Fonts
+    badge_font = load_font("DejaVuSansMono.ttf", 28)
+    hook_font_big = load_font("DejaVuSans.ttf", 72)
+    hook_font_green = load_font("DejaVuSans-Bold.ttf", 84)
+    terminal_title_font = load_font("DejaVuSansMono.ttf", 24)
+    code_font = load_font("DejaVuSansMono.ttf", 74)
+    option_font = load_font("DejaVuSansMono.ttf", 30)
+    emoji_font = load_font("DejaVuSans.ttf", 56)
+    footer_font = load_font("DejaVuSans.ttf", 22)
+    logo_font = load_font("DejaVuSans.ttf", 54)
+    cta_font = load_font("DejaVuSansMono.ttf", 26)
+
+    # Background subtle grid
+    for y in range(0, height, 6):
+        draw.line((0, y, width, y), fill=(12,12,13))
+
+    # Badges
+    draw.rounded_rectangle(
+        (32, 34, 355, 102),
+        radius=18,
+        outline=GREEN,
+        width=2
+    )
+
+    draw.text(
+        (52, 50),
+        "⚡ JS CHALLENGE" if ttype == "JS" else "🧠 ALGO CHALLENGE",
+        fill=GREEN,
+        font=badge_font
+    )
+
+    prog = f"#{day_number:03d} / {PROGRESSION_TOTAL}"
+
+    draw.rounded_rectangle(
+        (820, 34, 1048, 102),
+        radius=18,
+        outline=GREEN,
+        width=2
+    )
+
+    draw.text(
+        (850, 50),
+        prog,
+        fill=GREEN,
+        font=badge_font
+    )
+
+    # Hook
+    draw.text((36, 138), "90% des devs JS", fill=WHITE, font=hook_font_big)
+    draw.text((36, 236), "se trompent", fill=GREEN, font=hook_font_green)
+    draw.text((525, 236), "sur cette ligne.", fill=WHITE, font=hook_font_big)
+
+    # Terminal
+    tx, ty = 32, 334
+    tw, th = 1016, 350
+
+    draw.rounded_rectangle(
+        (tx, ty, tx+tw, ty+th),
+        radius=28,
+        fill=(10,10,12),
+        outline=(48,48,58),
+        width=2
+    )
+
+    title_h = 78
+
+    draw.rounded_rectangle(
+        (tx, ty, tx+tw, ty+title_h),
+        radius=28,
+        fill=(16,16,18)
+    )
+
+    # Mac dots
+    draw.ellipse((58, 360, 88, 390), fill=RED)
+    draw.ellipse((108, 360, 138, 390), fill=YELLOW)
+    draw.ellipse((158, 360, 188, 390), fill=GREEN)
+
+    draw.text(
+        (470, 360),
+        "js.js — codebog",
+        fill=(120,120,125),
+        font=terminal_title_font
+    )
+
+    # Left neon bar
+    draw.rectangle((34, 448, 46, 628), fill=GREEN)
+
+    # Line number
+    draw.text((62, 430), "1", fill=(90,90,100), font=hook_font_big)
+
+    # Syntax highlight
+    code_y = 500
+
+    x = 84
+
+    parts = [
+        ("console", GREEN),
+        (".log", WHITE),
+        ("(", WHITE),
+        ("typeof null", PURPLE),
+        (")", WHITE)
+    ]
+
+    for text_part, color in parts:
+        draw.text((x, code_y), text_part, fill=color, font=code_font)
+        bbox = draw.textbbox((x, code_y), text_part, font=code_font)
+        x = bbox[2]
+
+    # Answers
+    answers_y = 710
+
+    positions = [
+        (32, answers_y),
+        (550, answers_y),
+        (32, answers_y + 126),
+        (550, answers_y + 126),
+    ]
+
+    for i, opt in enumerate(options[:4]):
+
+        px, py = positions[i]
+
+        draw.rounded_rectangle(
+            (px, py, px+486, py+104),
+            radius=18,
+            fill=(12,12,16),
+            outline=(48,48,58),
+            width=2
+        )
+
+        draw.text(
+            (72, py + 18),
+            REACTION_EMOJIS[i],
+            font=emoji_font,
+            fill=WHITE
+        )
+
+        draw.text(
+            (188, py + 34),
+            opt,
+            fill=WHITE,
+            font=option_font
+        )
+
+    # CTA
+    cta_y = 968
+
+    draw.rounded_rectangle(
+        (32, cta_y, 1048, cta_y + 100),
+        radius=18,
+        outline=GREEN,
+        width=2
+    )
+
+    draw.text(
+        (130, cta_y + 30),
+        "↓",
+        fill=GREEN,
+        font=hook_font_green
+    )
+
+    draw.text(
+        (250, cta_y + 28),
+        "RÉAGIS",
+        fill=GREEN,
+        font=cta_font
+    )
+
+    draw.text(
+        (420, cta_y + 28),
+        "AVANT DE LIRE LES COMMENTAIRES !",
+        fill=WHITE,
+        font=cta_font
+    )
+
+    # Footer
+    fy = 1115
+
+    draw.line((32, 1088, 1048, 1088), fill=(22,80,40), width=1)
+
+    draw.text((36, 1110), "code", fill=WHITE, font=logo_font)
+    draw.text((162, 1110), "bog", fill=GREEN, font=logo_font)
+
+    img = img.crop((0, 0, 1080, 1080))
+
+    img.save(output_path)
+
+
+# MAIN EXPORT
+def export_premium_post(topic, day_number=1, output_dir="premium_posts"):
+    os.makedirs(output_dir, exist_ok=True)
+
+    filename = topic[1].replace(" ", "_").replace("/", "_").lower()
+
+    output_path = os.path.join(output_dir, f"{filename}.png")
+
+    generate_premium_post_image(
+        topic,
+        day_number=day_number,
+        output_path=output_path
+    )
+
+    return output_path
