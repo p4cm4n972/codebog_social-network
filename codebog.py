@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 Codebog Post Generator v4 - Architecture Modulaire
 
@@ -12,7 +13,14 @@ Usage:
 """
 import argparse
 import os
+import sys
 from datetime import date, timedelta
+
+# Forcer l'encodage UTF-8 pour Windows
+if sys.platform == 'win32':
+    import codecs
+    sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
+    sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'strict')
 
 # Imports locaux (nouvelle architecture)
 from config import OUTPUT_DIR
@@ -25,6 +33,7 @@ def main():
     parser = argparse.ArgumentParser(description='Génère des posts Codebog')
     parser.add_argument('--day', type=int, help='Jour spécifique (1-365)')
     parser.add_argument('--all', action='store_true', help='Générer tous les posts')
+    parser.add_argument('--preview', action='store_true', help='Prévisualiser sans générer')
     parser.add_argument('--output', default=OUTPUT_DIR, help='Dossier de sortie')
     args = parser.parse_args()
 
@@ -37,16 +46,23 @@ def main():
     if args.all:
         print(f"Génération de {len(schedule)} posts...")
         for post in schedule:
-            generate_post(post, args.output)
-        print(f"✓ {len(schedule)} posts générés dans {args.output}/")
+            if args.preview:
+                preview_post(post)
+            else:
+                generate_post(post, args.output)
+        if not args.preview:
+            print(f"✓ {len(schedule)} posts générés dans {args.output}/")
 
     elif args.day:
         if args.day < 1 or args.day > len(schedule):
             print(f"Erreur : le jour doit être entre 1 et {len(schedule)}")
             return
         post = schedule[args.day - 1]
-        generate_post(post, args.output)
-        print(f"✓ Post jour #{args.day} généré")
+        if args.preview:
+            preview_post(post)
+        else:
+            generate_post(post, args.output)
+            print(f"✓ Post jour #{args.day} généré")
 
     else:
         # Par défaut : post du jour
@@ -59,6 +75,35 @@ def main():
 
         print(f"Aucun post prévu pour aujourd'hui ({today})")
         print("Utilise --day N pour générer un post spécifique")
+
+
+def preview_post(post):
+    """
+    Affiche un aperçu du post sans générer les fichiers.
+
+    Args:
+        post: Dictionnaire avec les données du post
+    """
+    print(f"\n{'='*70}")
+    print(f"  JOUR #{post['day']:03d} - {post['type']} - Phase {post['phase']}")
+    print(f"  {post['date']} ({post['day_name']})")
+    print(f"{'='*70}")
+    print(f"\nSUJET: {post['topic']}")
+    print(f"\nHOOK:")
+    print(f"   {post['hook']}")
+    print(f"\nCODE:")
+    for i, line in enumerate(post['code'].split('\n'), 1):
+        print(f"   {i:2d}  {line}")
+    print(f"\nOPTIONS:")
+    for emoji, label in post['options'].items():
+        correct = " [CORRECT]" if emoji == post['correct_emoji'] else ""
+        print(f"   {emoji} {label}{correct}")
+    print(f"\nREPONSE: {post['answer']}")
+    print(f"\nEXPLICATION:")
+    for line in post['explanation'].split('\n'):
+        print(f"   {line}")
+    print(f"\nTIP: {post['tip']}")
+    print(f"\n{'='*70}\n")
 
 
 def generate_post(post, output_dir):
@@ -90,7 +135,26 @@ def generate_post(post, output_dir):
     with open(txt_path, 'w', encoding='utf-8') as f:
         f.write(text)
 
+    # Affichage formaté du résultat
+    print(f"\n{'─'*70}")
     print(f"  [{day:03d}] {post['type']} · {post['topic']}")
+    print(f"{'─'*70}")
+    print(f"\n✅ Réponse : {post['correct_emoji']} {post['answer']}")
+    print(f"\n💡 Explication :")
+    for line in post['explanation'].split('\n'):
+        print(f"   {line}")
+    print(f"\n🎓 Tip : {post['tip']}")
+
+    # CTA
+    if post['type'] == 'JS':
+        print(f"\n👉 Entraîne-toi en JS : codebog.itmade.fr")
+    else:
+        print(f"\n👉 Apprends l'algo : learning.itmade.fr")
+
+    print(f"\n📁 Fichiers générés :")
+    print(f"   - {img_path}")
+    print(f"   - {txt_path}")
+    print(f"{'─'*70}\n")
 
 
 def show_stats():

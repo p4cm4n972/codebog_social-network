@@ -1580,7 +1580,7 @@ def generate_image(post, output_path):
     OH   = 100                        # hauteur d'une option
     OG   = 16                         # gap entre options
     CTA_H = 72
-    FOOT_H = 78                       # séparateur + footer
+    FOOT_H = 110                      # séparateur + footer (2 lignes de texte + marges)
     FIXED_BELOW = (2*OH + OG) + GAP_HOOK_TERM + CTA_H + FOOT_H + 30
 
     # ── Espace disponible pour le terminal ──────────
