@@ -66,3 +66,11 @@ EMOJI_B64 = {
 }
 
 EMOJI_ORDER = ["heart", "astonished", "joy", "fire"]
+
+# Mapping noms -> emojis Unicode pour l'affichage
+EMOJI_UNICODE = {
+    "heart": "❤️",
+    "astonished": "😮",
+    "joy": "😂",
+    "fire": "🔥"
+}

@@ -246,4 +246,307 @@ ALGO_CHALLENGES = [
 # Jour 162 — ALGO
 ('ALGO', "Knuth's optimization", "Quand appliquer l'optimisation de Knuth pour la DP ?", "// Knuth's optimization :\n// Pour certains DP : dp[i][j] = opt sur dp[i][k]+dp[k][j]\n// Si la fonction de coût est monotone et concave...\n// On peut passer de O(n³) à O(n²)\n//\n// Exemple : matrix chain multiplication\n// Optimal BST\n// Partition de tableau", ['Toujours', 'Jamais', "Pour les DP de type 'partitionner un intervalle'", 'Pour les graphes'], 2, "Pour les DP de type 'partitionner un intervalle'", "Knuth's optimization s'applique quand opt(i,j) est monotone.\nPassage de O(n³) à O(n²) pour certains problèmes DP.\nMatrix chain multiplication est le cas classique.", '// Knuth opt : vérifier monotonicity + quadrangle inequality'),
 
+# Jour 164 — ALGO
+('ALGO', 'Linear vs Binary', 'Quelle recherche en O(log n) ?', 'arr = [1, 3, 5, 7, 9]\n# A: parcourir tous\n# B: diviser par 2', ['Linear O(n)', 'Binary O(log n)', 'Les deux O(n)', 'Les deux O(log n)'], 1, 'Binary O(log n)', 'Binary search divise par 2 à chaque étape → O(log n).\nLinear search parcourt tous les éléments → O(n).\nMAIS binary search nécessite un tableau TRIÉ.', '// Binary : O(log n) mais nécessite tri | Linear : O(n) toujours'),
+
+# Jour 166 — ALGO
+('ALGO', 'Selection Sort', 'Comment fonctionne selection sort ?', 'Trouver le min, placer au début\nRépéter pour sous-tableau restant', ['O(n²) toujours', 'O(n log n)', 'O(n)', 'Dépend'], 0, 'O(n²) toujours', 'Selection sort trouve le minimum et le place au début.\nPour chaque position, parcourt le reste → O(n²).\nMême si déjà trié, parcourt toujours tout.', '// Selection sort : O(n²) toujours, pas adaptatif'),
+
+# Jour 168 — ALGO
+('ALGO', 'Récursion base case', 'Sans base case, que se passe-t-il ?', 'function recurse(n) {\n  return recurse(n-1)\n}', ['Stack overflow', 'Boucle infinie', 'Erreur', 'Dépend'], 0, 'Stack overflow', "Sans cas de base, la récursion ne s'arrête jamais.\nChaque appel empile un frame → stack overflow.\nToujours définir un cas de base clair.", '// Récursion : base case OBLIGATOIRE (sinon stack overflow)'),
+
+# Jour 170 — ALGO
+('ALGO', 'Stack récursif', "Ordre d'exécution ?", 'function f(n) {\n  if (n === 0) return\n  console.log(n)\n  f(n-1)\n  console.log(n)\n}\nf(3)', ['3 2 1 1 2 3', '3 2 1', '1 2 3 3 2 1', '1 2 3'], 0, '3 2 1 1 2 3', "Empile 3, 2, 1. À 0, remonte.\nDépile : 1, 2, 3.\nAffiche à l'aller ET au retour.", '// Récursion : aller (descente) puis retour (remontée)'),
+
+# Jour 172 — ALGO
+('ALGO', 'Quicksort pivot optimal', 'Quel pivot pour éviter O(n²) ?', 'arr déjà trié, pivot = premier élément', ['Médian des 3', 'Aléatoire', 'Milieu', 'Toutes sauf premier'], 3, 'Toutes sauf premier', 'Si pivot = premier sur tableau trié → pire cas O(n²).\nMédian-of-3, aléatoire, ou milieu évitent ce problème.\nPivot aléatoire garantit O(n log n) en moyenne.', '// Quicksort : éviter premier/dernier sur tableaux triés'),
+
+# Jour 174 — ALGO
+('ALGO', 'Array vs Linked List', 'Accès par index ?', 'arr[i] vs list.get(i)', ['Array O(1) | List O(n)', 'Array O(n) | List O(1)', 'Les deux O(1)', 'Les deux O(n)'], 0, 'Array O(1) | List O(n)', 'Array : accès direct par index → O(1).\nLinked List : parcourir depuis head → O(n).\nMais insertion/suppression en tête : List O(1), Array O(n).', '// Array : accès O(1), insert O(n) | List : accès O(n), insert O(1)'),
+
+# Jour 176 — ALGO
+('ALGO', 'Hash table collisions', 'Gestion des collisions ?', 'Deux clés ont le même hash', ['Chaining (liste)', 'Open addressing', 'Les deux', 'Impossible'], 2, 'Les deux', 'Chaining : chaque bucket est une liste.\nOpen addressing : chercher le prochain slot libre.\nLes deux méthodes sont valides, trade-offs différents.', '// Collisions : chaining (listes) ou open addressing (probe)'),
+
+# Jour 178 — ALGO
+('ALGO', 'Bonne fonction hash', 'Propriété essentielle ?', 'Même input → même hash\nDifférents inputs → différents hashs (si possible)', ['Déterministe', 'Distribution uniforme', 'Rapide', 'Tout ça'], 3, 'Tout ça', 'Une bonne hash function :\n• Déterministe (même input → même hash).\n• Distribution uniforme (évite collisions).\n• Rapide à calculer.', '// Hash : déterministe + uniforme + rapide'),
+
+# Jour 180 — ALGO
+('ALGO', 'Load factor hash table', 'Quand resize ?', 'load_factor = n / capacity\nSi > 0.75, resize', ['Trop de collisions', 'Performance dégradée', 'Resize à 2x capacity', 'Tout ça'], 3, 'Tout ça', 'Load factor = nombre éléments / capacité.\nSi trop élevé → trop de collisions → resize (souvent 2x).\nTrade-off mémoire vs performance.', '// Load factor > 0.75 : resize pour maintenir O(1)'),
+
+# Jour 182 — ALGO
+('ALGO', 'Best vs Worst case', 'Quicksort pire cas ?', 'Pivot toujours min/max', ['O(n log n)', 'O(n²)', 'O(n)', 'O(log n)'], 1, 'O(n²)', 'Quicksort pire cas : pivot toujours min/max → partitions déséquilibrées.\nO(n²) si tableau déjà trié et pivot = premier.\nMoyenne : O(n log n).', '// Quicksort : avg O(n log n) | worst O(n²)'),
+
+# Jour 184 — ALGO
+('ALGO', 'O vs Ω vs Θ', 'Quelle notation pour borne exacte ?', 'O = borne sup\nΩ = borne inf\nΘ = borne exacte', ['O', 'Ω', 'Θ', 'Aucune'], 2, 'Θ', 'O (big-O) = borne supérieure (pire cas ou plus).\nΩ (omega) = borne inférieure (meilleur cas ou plus).\nΘ (theta) = borne exacte (tight bound).', '// O : ≤ | Ω : ≥ | Θ : ='),
+
+# Jour 186 — ALGO
+('ALGO', 'Boucles imbriquées', 'Complexité ?', 'for i in range(n):\n  for j in range(i, n):\n    print(i, j)', ['O(n)', 'O(n²)', 'O(n log n)', 'O(2n)'], 1, 'O(n²)', 'Boucle externe : n itérations.\nBoucle interne : moyenne n/2 itérations.\nn * n/2 = O(n²) (constantes ignorées).', '// Boucles imbriquées : multiplier les itérations'),
+
+# Jour 188 — ALGO
+('ALGO', 'Relation de récurrence', 'T(n) = 2T(n/2) + n', 'T(n) = 2T(n/2) + n', ['O(n)', 'O(n log n)', 'O(n²)', 'O(log n)'], 1, 'O(n log n)', "C'est la récurrence de merge sort.\nMaster theorem : a=2, b=2, f(n)=n → cas 2 → O(n log n).\nDivise par 2, combine en O(n) par niveau.", '// T(n) = 2T(n/2) + n : merge sort = O(n log n)'),
+
+# Jour 190 — ALGO
+('ALGO', 'Master theorem', 'T(n) = T(n/2) + O(1)', 'T(n) = T(n/2) + O(1)', ['O(n)', 'O(log n)', 'O(n log n)', 'O(1)'], 1, 'O(log n)', 'Divise par 2, travail constant par niveau.\nProfondeur log n, travail O(1) par niveau → O(log n).\nExemple : binary search.', '// T(n) = T(n/2) + O(1) : binary search = O(log n)'),
+
+# Jour 192 — ALGO
+('ALGO', 'Insertion sort complexité', 'Meilleur cas ?', 'Tableau déjà trié', ['O(n)', 'O(n²)', 'O(n log n)', 'O(log n)'], 0, 'O(n)', 'Si déjà trié, chaque élément est déjà à sa place.\nUne seule comparaison par élément → O(n).\nPire cas (inversé) → O(n²).', '// Insertion sort : best O(n) | avg/worst O(n²)'),
+
+# Jour 194 — ALGO
+('ALGO', 'Merge sort toujours', 'Complexité garantie ?', "Quel que soit l'input", ['O(n log n)', 'O(n²)', 'Dépend', 'O(n)'], 0, 'O(n log n)', 'Merge sort divise TOUJOURS par 2 (log n niveaux).\nMerge TOUJOURS en O(n) par niveau.\nDonc O(n log n) garanti, même pire cas.', '// Merge sort : O(n log n) TOUJOURS (stable, prévisible)'),
+
+# Jour 196 — ALGO
+('ALGO', 'Contains Duplicate', 'Approche optimale ?', 'nums = [1,2,3,1]\nTrouver si duplicate', ['Hash set O(n)', 'Tri puis compare O(n log n)', 'Deux boucles O(n²)', 'Hash set'], 3, 'Hash set', 'Hash set : ajouter en parcourant, si déjà présent → duplicate.\nO(n) temps, O(n) espace.\nTri marche aussi mais O(n log n).', '// Duplicate detection : hash set = O(n) optimal'),
+
+# Jour 198 — ALGO
+('ALGO', 'Anagram validation', 'Méthode efficace ?', 's = "anagram"\nt = "nagaram"', ['Trier les deux O(n log n)', 'Frequency map O(n)', 'Les deux valides', 'Map plus rapide'], 2, 'Les deux valides', 'Méthode 1 : trier et comparer → O(n log n).\nMéthode 2 : compter fréquences → O(n).\nMap est optimal en temps.', '// Anagram : frequency map O(n) > sort O(n log n)'),
+
+# Jour 200 — ALGO
+('ALGO', 'Two Sum optimal', 'Trouver 2 nombres = target', 'nums = [2,7,11,15]\ntarget = 9', ['Hash map one-pass', 'Deux boucles', 'Tri + two pointers', 'Hash map'], 3, 'Hash map', 'Hash map : stocker {valeur: index} en parcourant.\nPour chaque num, chercher target-num dans map.\nO(n) temps, O(n) espace.', '// Two Sum : hash map one-pass = O(n)'),
+
+# Jour 202 — ALGO
+('ALGO', 'Stock profit max', 'Stratégie optimale ?', 'prices = [7,1,5,3,6,4]\nMax profit ?', ['Track min, calc profit', 'Tous les pairs', 'Tri', 'Min puis max'], 0, 'Track min, calc profit', "Garder le prix min vu jusqu'ici.\nCalculer profit si on vend aujourd'hui.\nO(n) un seul passage.", '// Stock : track min + calc max profit = O(n)'),
+
+# Jour 204 — ALGO
+('ALGO', 'Parenthèses valides', 'Structure optimale ?', 's = "([{}])"', ['Stack', 'Counter', 'Regex', 'Deux pointeurs'], 0, 'Stack', 'Stack : push ouvrante, pop fermante.\nVérifier que pop correspond.\nO(n) temps, O(n) espace (stack).', '// Parenthèses : stack pour matching = O(n)'),
+
+# Jour 206 — ALGO
+('ALGO', 'Maximum Subarray', 'Sous-tableau somme max', 'nums = [-2,1,-3,4,-1,2,1,-5,4]', ['Kadane O(n)', 'Brute force O(n²)', 'Divide & conquer O(n log n)', 'Kadane optimal'], 3, 'Kadane optimal', 'Kadane : max_current = max(num, max_current + num).\nO(n) un seul passage.\nMeilleur que brute force O(n²).', '// Kadane : sous-tableau max en O(n)'),
+
+# Jour 208 — ALGO
+('ALGO', 'Merge 2 listes triées', 'Approche efficace ?', 'l1 = 1→2→4\nl2 = 1→3→4', ['Two pointers', 'Concat puis tri', 'Récursion', 'Two pointers optimal'], 3, 'Two pointers optimal', 'Deux pointeurs : comparer têtes, avancer le plus petit.\nO(n+m) temps, O(1) espace (in-place si modif pointeurs).\nRécursion marche aussi mais stack O(n).', '// Merge lists : two pointers = O(n+m)'),
+
+# Jour 210 — ALGO
+('ALGO', 'Reverse liste itératif', 'Complexité optimale ?', '1→2→3→4→5', ['O(n) temps O(1) espace', 'O(n²)', 'O(n) temps O(n) espace', 'Impossible O(1)'], 0, 'O(n) temps O(1) espace', 'Itératif : 3 pointeurs (prev, curr, next).\nInverser les liens en parcourant.\nO(n) temps, O(1) espace.', '// Reverse list itératif : O(n) temps, O(1) espace'),
+
+# Jour 212 — ALGO
+('ALGO', 'Climbing Stairs pattern', 'Reconnaître le pattern', 'n = 5 marches\n1 ou 2 marches à la fois', ['Fibonacci', 'Factorielle', 'Exponentielle', 'Linéaire'], 0, 'Fibonacci', "f(n) = f(n-1) + f(n-2).\nC'est exactement Fibonacci.\nDP ou itératif : O(n) temps.", '// Stairs : Fibonacci déguisé = DP O(n)'),
+
+# Jour 214 — ALGO
+('ALGO', '3Sum two pointers', 'Extension de Two Sum', 'nums = [-1,0,1,2,-1,-4]\nTrouver triplets = 0', ['Sort + two pointers O(n²)', 'Brute force O(n³)', 'Hash O(n²) espace', 'Sort optimal'], 3, 'Sort optimal', 'Trier, puis pour chaque num, Two Sum sur le reste.\nO(n²) temps, O(1) espace (hors tri).\nÉviter duplicates avec skip.', '// 3Sum : sort + two pointers = O(n²)'),
+
+# Jour 216 — ALGO
+('ALGO', 'Container With Water', 'Two pointers stratégie', 'height = [1,8,6,2,5,4,8,3,7]', ['Two pointers gauche/droite', 'Brute force', 'Stack', 'Two pointers optimal'], 3, 'Two pointers optimal', 'Pointeurs aux extrémités, déplacer le plus petit.\nLargeur diminue → il faut augmenter hauteur.\nO(n) un seul passage.', '// Container : two pointers (déplacer min) = O(n)'),
+
+# Jour 218 — ALGO
+('ALGO', 'Longest Substring Unique', 'Sliding window pattern', 's = "abcabcbb"', ['Sliding window + hash set', 'Brute force', 'Two pointers', 'Window optimal'], 3, 'Window optimal', 'Sliding window : étendre à droite, rétrécir si duplicate.\nHash set pour tracker caractères dans fenêtre.\nO(n) temps.', '// Longest substring : sliding window + set = O(n)'),
+
+# Jour 220 — ALGO
+('ALGO', 'Minimum Window Substring', 'Pattern avancé', 's = "ADOBECODEBANC"\nt = "ABC"', ['Sliding window + freq map', 'Brute force', 'Two pointers', 'Window complexe'], 3, 'Window complexe', "Window : étendre jusqu'à contenir t, rétrécir pour minimiser.\nFrequency maps pour s et t.\nO(n+m) temps.", '// Min window : sliding window + 2 freq maps = O(n+m)'),
+
+# Jour 222 — ALGO
+('ALGO', 'Group Anagrams', 'Clé de groupement', 'strs = ["eat","tea","tan","ate","nat","bat"]', ['Sort comme clé', 'Count array clé', 'Les deux', 'Count plus rapide'], 2, 'Les deux', 'Méthode 1 : sort string comme clé → O(n * k log k).\nMéthode 2 : count array (26 lettres) → O(n * k).\nLes deux valides.', '// Group anagrams : sort ou count array comme clé de hash'),
+
+# Jour 224 — ALGO
+('ALGO', 'Product Array Except Self', 'Sans division', 'nums = [1,2,3,4]', ['Prefix/suffix products', 'Division par total', 'Brute force', 'Prefix optimal'], 3, 'Prefix optimal', 'Prefix products de gauche, suffix de droite.\nresult[i] = prefix[i-1] * suffix[i+1].\nO(n) temps, O(1) espace (hors result).', '// Product except self : prefix * suffix = O(n)'),
+
+# Jour 226 — ALGO
+('ALGO', 'Rotate Array trick', 'Rotate k positions', 'nums = [1,2,3,4,5,6,7]\nk = 3', ['Reverse 3 fois', 'Brute force shift', 'Extra array', 'Reverse optimal'], 3, 'Reverse optimal', 'Reverse tout, reverse [0, k-1], reverse [k, n-1].\nO(n) temps, O(1) espace.\nAstuce élégante.', '// Rotate : reverse 3x (tout, gauche, droite) = O(n) O(1)'),
+
+# Jour 228 — ALGO
+('ALGO', 'Spiral Matrix traversal', 'Pattern de parcours', 'matrix 3x3', ['4 directions avec bounds', 'Récursion', 'Stack', 'Directions optimal'], 3, 'Directions optimal', 'Droite → bas → gauche → haut.\nRéduire bounds après chaque direction.\nO(m*n) temps.', '// Spiral : 4 directions + shrink bounds = O(m*n)'),
+
+# Jour 230 — ALGO
+('ALGO', 'Set Matrix Zeroes in-place', 'Marquage sans espace', 'Si cell = 0, row/col = 0', ['Utiliser 1ère row/col', 'Extra array', 'Impossible in-place', 'First row/col optimal'], 3, 'First row/col optimal', "Utiliser 1ère ligne et colonne comme marqueurs.\nO(m*n) temps, O(1) espace.\nAttention à l'ordre de traitement.", '// Matrix zeroes : first row/col as markers = O(1) space'),
+
+# Jour 232 — ALGO
+('ALGO', 'Word Search backtracking', 'DFS avec retour arrière', 'board + word = "ABCCED"', ['DFS + backtracking', 'BFS', 'Dynamic programming', 'DFS optimal'], 3, 'DFS optimal', 'DFS depuis chaque cellule, backtrack si chemin invalide.\nMarquer visité puis unmark (backtrack).\nO(m*n*4^L) pire cas.', '// Word search : DFS + backtrack + visited marking'),
+
+# Jour 234 — ALGO
+('ALGO', 'Combination Sum', 'Backtracking avec réutilisation', 'candidates = [2,3,6,7]\ntarget = 7', ['Backtracking récursif', 'DP', 'Greedy', 'Backtracking optimal'], 3, 'Backtracking optimal', 'Backtracking : inclure current (peut réutiliser) ou skip.\nBase case : sum = target.\nO(2^target) complexité.', '// Combination sum : backtracking avec réutilisation'),
+
+# Jour 236 — ALGO
+('ALGO', 'Permutations génération', 'Toutes les permutations', 'nums = [1,2,3]', ['Backtracking swap', 'DP', 'Itératif', 'Backtracking optimal'], 3, 'Backtracking optimal', 'Backtracking : swap current avec chaque suivant.\nRécursion, puis swap back (backtrack).\nO(n! * n) temps.', '// Permutations : backtracking + swap = O(n!)'),
+
+# Jour 238 — ALGO
+('ALGO', 'Subsets génération', 'Tous les sous-ensembles', 'nums = [1,2,3]', ['Backtracking ou bit mask', 'DP', 'Itératif', 'Les deux valides'], 3, 'Les deux valides', 'Backtracking : inclure ou exclure chaque élément.\nBit mask : chaque bit = inclus/exclus.\nO(2^n * n) temps.', '// Subsets : backtracking ou bitmask = O(2^n)'),
+
+# Jour 240 — ALGO
+('ALGO', 'Course Schedule cycle', 'Détection cycle graphe', 'prereq = [[1,0], [0,1]]', ['DFS + 3 states', 'BFS topological', 'Les deux', 'DFS optimal'], 2, 'Les deux', 'DFS : 3 états (unvisited, visiting, visited) pour cycle.\nOu Kahn (BFS topological) : si indegree > 0 à la fin → cycle.\nLes deux O(V+E).', '// Cycle detection : DFS 3-color ou Kahn topological'),
+
+# Jour 242 — ALGO
+('ALGO', 'Number of Islands', 'Composantes connexes', 'grid 2D de 1s et 0s', ['DFS ou BFS pour marquer', 'Union-Find', 'Les deux', 'DFS/BFS optimal'], 3, 'DFS/BFS optimal', 'Parcourir grid, pour chaque 1 non visité : DFS/BFS pour marquer île.\nCompter le nombre de DFS lancés.\nO(m*n) temps.', '// Islands : DFS/BFS pour composantes = O(m*n)'),
+
+# Jour 244 — ALGO
+('ALGO', 'Clone Graph', 'Deep copy graphe', 'node avec neighbors', ['DFS/BFS + hash map', 'Récursion simple', 'Impossible', 'Hash map essentiel'], 3, 'Hash map essentiel', 'Hash map {original: clone} pour éviter cycles.\nDFS/BFS : cloner node, puis neighbors récursivement.\nO(V+E) temps.', '// Clone graph : DFS/BFS + hash map (old→new)'),
+
+# Jour 246 — ALGO
+('ALGO', 'BFS avec queue', 'Implémentation correcte', 'graph traversal', ['Queue FIFO', 'Stack LIFO', 'Récursion', 'Queue obligatoire'], 3, 'Queue obligatoire', 'BFS utilise une QUEUE (FIFO) pour niveau par niveau.\nDFS utilise STACK (LIFO) ou récursion.\nO(V+E) temps.', '// BFS : queue FIFO | DFS : stack/recursion'),
+
+# Jour 248 — ALGO
+('ALGO', 'Dijkstra algorithme', 'Plus court chemin pondéré', 'graph avec poids positifs', ['Priority queue (min heap)', 'BFS simple', 'DFS', 'Heap essentiel'], 3, 'Heap essentiel', 'Dijkstra : priority queue pour toujours traiter le nœud le plus proche.\nRelaxation des arêtes.\nO((V+E) log V) avec heap.', '// Dijkstra : min heap + relaxation = O((V+E) log V)'),
+
+# Jour 250 — ALGO
+('ALGO', 'Graphes pondérés vs non', 'Algorithme approprié', 'Poids tous = 1 vs variés', ['BFS si unweighted | Dijkstra si weighted', 'Dijkstra toujours', 'BFS toujours', 'Adapter selon poids'], 0, 'BFS si unweighted | Dijkstra si weighted', 'BFS trouve le plus court chemin si poids = 1 (ou tous égaux).\nSi poids variés, BFS ne marche pas → Dijkstra ou Bellman-Ford.\nO(V+E) vs O((V+E) log V).', '// Unweighted : BFS O(V+E) | Weighted : Dijkstra O((V+E) log V)'),
+
+# Jour 252 — ALGO
+('ALGO', 'Greedy algorithme', 'Propriété requise', 'Choix localement optimal', ['Optimal substructure', 'Greedy choice property', 'Les deux', 'Aucune garantie'], 2, 'Les deux', 'Greedy nécessite :\n1. Optimal substructure.\n2. Greedy choice property (choix local → optimal global).\nPas toujours correct (ex: change monnaie arbitraire).', '// Greedy : optimal substructure + greedy choice property'),
+
+# Jour 254 — ALGO
+('ALGO', 'DP memoization', 'Top-down approche', 'fibonacci(n)', ['Récursion + cache', 'Itératif', 'Les deux DP', 'Memo = top-down'], 3, 'Memo = top-down', 'Memoization = top-down : récursion + cache des résultats.\nÉvite recalcul des sous-problèmes.\nO(n) au lieu de O(2^n) pour fib.', '// Memoization : top-down récursif + cache'),
+
+# Jour 256 — ALGO
+('ALGO', 'DP bottom-up', 'Approche itérative', 'fibonacci(n)', ['Itératif tableau', 'Récursion', 'Les deux DP', 'Bottom-up = itératif'], 3, 'Bottom-up = itératif', 'Bottom-up = itératif : tableau, remplir de bas en haut.\nPas de récursion, pas de stack overflow.\nO(n) temps, souvent O(1) espace optimisable.', '// Bottom-up : itératif + tableau (ou variables)'),
+
+# Jour 258 — ALGO
+('ALGO', 'Knapsack 0/1', 'Prendre ou ne pas prendre', 'items avec poids/valeur', ['DP[i][w] = max(take, skip)', 'Greedy', 'Backtracking', 'DP optimal'], 3, 'DP optimal', 'DP : pour chaque item, max(prendre, skip).\nÉtat : DP[i][w] = valeur max avec i items, poids w.\nO(n*W) temps pseudo-polynomial.', '// Knapsack 0/1 : DP max(take, skip) = O(n*W)'),
+
+# Jour 260 — ALGO
+('ALGO', 'LCS dynamic programming', 'Sous-séquence commune max', 's1 = "abcde"\ns2 = "ace"', ['DP[i][j] = LCS(s1[:i], s2[:j])', 'Greedy', 'Two pointers', 'DP optimal'], 3, 'DP optimal', 'DP : si s1[i] == s2[j], DP[i][j] = DP[i-1][j-1] + 1.\nSinon, max(DP[i-1][j], DP[i][j-1]).\nO(n*m) temps.', '// LCS : DP avec match/skip = O(n*m)'),
+
+# Jour 262 — ALGO
+('ALGO', 'Queue BFS nécessaire', 'Pourquoi queue ?', 'Parcours niveau par niveau', ['FIFO garantit ordre', 'Plus rapide', 'Stack marche aussi', 'FIFO essentiel'], 3, 'FIFO essentiel', "Queue (FIFO) assure qu'on traite les nœuds niveau par niveau.\nStack (LIFO) donnerait DFS, pas BFS.\nL'ordre est essentiel pour BFS.", '// BFS : queue FIFO pour ordre niveau par niveau'),
+
+# Jour 264 — ALGO
+('ALGO', 'BST propriété', 'Binary Search Tree invariant', 'Gauche < root < Droite', ['Récursivement pour tout nœud', 'Seulement root', 'Seulement feuilles', 'Tout nœud'], 3, 'Récursivement pour tout nœud', "BST : pour CHAQUE nœud, gauche < nœud < droite.\nRécursivement dans tout l'arbre.\nPermet recherche O(log n) si équilibré.", '// BST : gauche < node < droite PARTOUT'),
+
+# Jour 266 — ALGO
+('ALGO', 'AVL tree rotations', 'Pourquoi rotations ?', 'Maintenir équilibre', ['Hauteur diff ≤ 1', 'Performance O(log n)', 'Les deux', 'Équilibre optimal'], 2, 'Les deux', 'AVL : |hauteur(gauche) - hauteur(droite)| ≤ 1.\nRotations (simple/double) pour rééquilibrer après insert/delete.\nGarantit O(log n) pour toutes opérations.', '// AVL : rotations pour |balance| ≤ 1 → O(log n) garanti'),
+
+# Jour 268 — ALGO
+('ALGO', 'Red-Black tree règles', 'Propriétés à maintenir', '5 invariants', ['Root noir', 'Pas 2 rouges consécutifs', 'Chemins noirs égaux', 'Tout ça'], 3, 'Tout ça', 'Red-Black :\n1. Root noir.\n2. Feuilles (NIL) noires.\n3. Rouge → enfants noirs.\n4. Tous chemins ont même nombre de nœuds noirs.\n5. Nouveau nœud = rouge.', '// RB-tree : 5 invariants → O(log n) garanti'),
+
+# Jour 270 — ALGO
+('ALGO', 'B-tree pour DB', 'Avantage sur BST ?', 'Disque vs mémoire', ["Moins d'accès disque", 'Nœuds avec multiple clés', 'Hauteur minimale', 'Tout ça'], 3, 'Tout ça', "B-tree : nœuds avec plusieurs clés (ex: 100-1000).\nHauteur très faible → moins d'I/O disque.\nUtilisé par MySQL, PostgreSQL, etc.", '// B-tree : multi-keys/node → faible hauteur → optimal pour disque'),
+
+# Jour 272 — ALGO
+('ALGO', 'Min-heap propriété', 'Invariant à maintenir', 'Parent ≤ enfants', ['Récursivement', 'Seulement root', 'Arbre complet aussi', 'Les deux'], 3, 'Les deux', 'Min-heap :\n1. Parent ≤ enfants (partout).\n2. Arbre complet (rempli gauche→droite).\nMax-heap : parent ≥ enfants.', '// Heap : parent ≤ enfants + arbre complet'),
+
+# Jour 274 — ALGO
+('ALGO', 'Heapify complexité', 'Construire heap', 'array → heap', ['O(n log n)', 'O(n)', 'O(log n)', 'O(n) optimal'], 3, 'O(n) optimal', 'Heapify bottom-up : O(n), pas O(n log n).\nMajorité des nœuds sont en bas (peu de bubbling).\nAnalyse mathématique : somme série géométrique.', '// Heapify : O(n) bottom-up, pas O(n log n)'),
+
+# Jour 276 — ALGO
+('ALGO', 'Priority queue implémentation', 'Structure optimale', 'insert + extractMin', ['Min-heap', 'Sorted array', 'Unsorted array', 'Heap optimal'], 3, 'Heap optimal', 'Heap : insert O(log n), extractMin O(log n).\nSorted array : insert O(n), extract O(1).\nHeap est le meilleur compromis.', '// Priority queue : heap = insert O(log n) + extract O(log n)'),
+
+# Jour 278 — ALGO
+('ALGO', 'DSU Union-Find', 'Composantes disjointes', 'union + find operations', ['Path compression', 'Union by rank', 'Les deux', 'Optimisations essentielles'], 3, 'Optimisations essentielles', 'DSU basique : O(n) pire cas.\nPath compression : flatten tree lors de find.\nUnion by rank : attacher petit arbre au grand.\nEnsemble → quasi O(1) (α(n) ≈ constant).', '// DSU : path compression + union by rank = quasi O(1)'),
+
+# Jour 280 — ALGO
+('ALGO', 'Union by rank', 'Pourquoi rank ?', 'Éviter arbres déséquilibrés', ['Hauteur minimale', 'Performance', 'Les deux', 'Équilibre optimal'], 2, 'Les deux', 'Union by rank : toujours attacher arbre moins profond au plus profond.\nÉvite dégénérescence en liste liée.\nCombine avec path compression → α(n).', '// Union by rank : attach shallow to deep → hauteur O(log n)'),
+
+# Jour 282 — ALGO
+('ALGO', 'Path compression DSU', 'Optimisation find', 'Flatten chemin vers root', ['Tous pointent root direct', 'Amortized O(1)', 'Les deux', 'Flatten essentiel'], 2, 'Les deux', 'Path compression : lors de find(x), faire pointer tous nœuds vers root.\nProchains find sont O(1).\nAmortized quasi-constant.', '// Path compression : flatten on find → amortized O(1)'),
+
+# Jour 284 — ALGO
+('ALGO', 'Binary Tree Max Path Sum', 'DFS avec max global', 'Chemin max peut ignorer root', ['DFS return max single path', 'Greedy', 'DP', 'DFS complexe'], 3, 'DFS complexe', 'DFS : pour chaque nœud, max path = node + max(left, 0) + max(right, 0).\nRetourner max single branch pour parent.\nO(n) temps.', '// Max path : DFS return single, update global avec both'),
+
+# Jour 286 — ALGO
+('ALGO', 'Serialize Tree', 'Préserver structure', 'tree → string → tree', ['Preorder + null markers', 'Inorder seul insuffisant', 'BFS level-order', 'Preorder optimal'], 3, 'Preorder optimal', 'Preorder avec marqueurs null (ex: "#") préserve structure.\nInorder seul ne suffit pas (ambiguïté).\nDeserialize : récursion avec queue.', '// Serialize : preorder + null markers = structure préservée'),
+
+# Jour 288 — ALGO
+('ALGO', 'Word Ladder', 'Shortest transformation', 'beginWord → endWord\n1 lettre à la fois', ['BFS shortest path', 'DFS', 'Dijkstra', 'BFS optimal'], 3, 'BFS optimal', 'BFS : chaque niveau = 1 transformation.\nTrouver shortest path dans graphe de mots.\nO(M² * N) avec M = longueur mot, N = nb mots.', '// Word ladder : BFS = shortest path in word graph'),
+
+# Jour 290 — ALGO
+('ALGO', 'Alien Dictionary', 'Ordre des lettres', 'words sorted in alien order', ['Topological sort', 'DFS ou Kahn', 'Graphe orienté', 'Tout ça'], 3, 'Tout ça', 'Construire graphe : edges = ordre entre lettres.\nTopological sort (DFS ou Kahn) pour ordre total.\nO(C) avec C = nb total de caractères.', '// Alien dict : build graph + topological sort'),
+
+# Jour 292 — ALGO
+('ALGO', 'Merge K Sorted Lists', 'Efficace pour K listes', 'k listes triées', ['Min-heap de K éléments', 'Merge 2 à 2', 'Les deux', 'Heap optimal'], 3, 'Heap optimal', 'Heap : garder K têtes, extract min et ajouter next.\nO(N log K) avec N = total éléments.\nMerge 2 à 2 : O(N log K) aussi.', '// Merge K : min-heap = O(N log K)'),
+
+# Jour 294 — ALGO
+('ALGO', 'Median Data Stream', '2 heaps pattern', 'addNum + findMedian', ['Max-heap (low) + Min-heap (high)', 'Sorted array', 'BST', 'Two heaps optimal'], 3, 'Two heaps optimal', "Max-heap pour moitié basse, min-heap pour moitié haute.\nÉquilibrer tailles : diff ≤ 1.\nMedian = top d'un heap ou moyenne des 2 tops.", '// Median stream : max-heap (low) + min-heap (high)'),
+
+# Jour 296 — ALGO
+('ALGO', 'Sliding Window Maximum', 'Deque pattern', 'Max de chaque fenêtre', ['Monotonic decreasing deque', 'Heap', 'BST', 'Deque optimal'], 3, 'Deque optimal', 'Deque : garder indices en ordre décroissant de valeurs.\nFront = max, retirer éléments hors fenêtre et < current.\nO(n) temps.', '// Sliding max : monotonic deque = O(n)'),
+
+# Jour 298 — ALGO
+('ALGO', 'LIS optimal', 'Subsequence croissante max', 'nums = [10,9,2,5,3,7,101,18]', ['DP O(n²) ou Binary Search O(n log n)', 'Greedy', 'Backtracking', 'Binary search optimal'], 3, 'Binary search optimal', 'DP : O(n²).\nOptimal : maintenir tableau tails, binary search pour update.\nO(n log n) temps, O(n) espace.', '// LIS : DP O(n²) | Binary search O(n log n) optimal'),
+
+# Jour 300 — ALGO
+('ALGO', 'Edit Distance Levenshtein', 'Min opérations (insert/delete/replace)', 'word1 → word2', ['DP[i][j] = min(insert, delete, replace)', 'Greedy', 'BFS', 'DP optimal'], 3, 'DP optimal', 'DP : si chars match, DP[i][j] = DP[i-1][j-1].\nSinon, min(insert, delete, replace) + 1.\nO(n*m) temps.', '// Edit distance : DP min(3 ops) = O(n*m)'),
+
+# Jour 302 — ALGO
+('ALGO', 'Regex Matching DP', '. et * wildcards', 's = "aa"\np = "a*"', ['DP[i][j] = match(s[:i], p[:j])', 'Greedy', 'Backtracking', 'DP complexe'], 3, 'DP complexe', 'DP : . = match any, * = 0+ du précédent.\nÉtats complexes avec * (0 ou 1+ match).\nO(n*m) temps.', '// Regex DP : . et * = états complexes = O(n*m)'),
+
+# Jour 304 — ALGO
+('ALGO', 'Burst Balloons DP', 'Max coins ordre optimal', 'Burst order matters', ['DP interval', 'Greedy', 'Backtracking', 'DP interval'], 3, 'DP interval', 'DP : considérer dernier ballon éclaté dans intervalle [i, j].\nDP[i][j] = max coins pour intervalle.\nO(n³) temps.', '// Burst balloons : interval DP (dernier éclaté) = O(n³)'),
+
+# Jour 306 — ALGO
+('ALGO', 'Decode Ways DP', 'Nombre de décodages', '"226" → ?, "2 26", "22 6", "2 2 6"', ['DP[i] = decode(s[:i])', 'Backtracking', 'Greedy', 'DP count paths'], 3, 'DP count paths', 'DP : DP[i] = DP[i-1] (single digit) + DP[i-2] (two digits si valide).\nComme climbing stairs avec contraintes.\nO(n) temps.', '// Decode ways : DP count (1-digit + 2-digit) = O(n)'),
+
+# Jour 308 — ALGO
+('ALGO', 'Unique Paths grid', 'Nombre de chemins', 'm x n grid\ndroite ou bas', ['DP[i][j] = DP[i-1][j] + DP[i][j-1]', 'Backtracking', 'BFS', 'DP sum paths'], 3, 'DP sum paths', 'DP : chemins vers (i,j) = chemins vers (i-1,j) + (i,j-1).\nO(m*n) temps, optimisable à O(n) espace.\nOu formule combinatoire C(m+n-2, m-1).', '// Unique paths : DP sum(left, up) = O(m*n) ou combinatoire'),
+
+# Jour 310 — ALGO
+('ALGO', 'Maximal Rectangle', 'Largest rectangle in matrix', 'matrix de 0s et 1s', ['Histogram stack pour chaque row', 'DP', 'Brute force', 'Stack optimal'], 3, 'Stack optimal', 'Pour chaque row : calculer hauteurs consécutives de 1s.\nAppliquer largest rectangle in histogram (stack).\nO(m*n) temps.', '// Maximal rectangle : histogram stack per row = O(m*n)'),
+
+# Jour 312 — ALGO
+('ALGO', 'Bellman-Ford algorithme', 'Plus court chemin poids négatifs', 'Relax |V|-1 fois', ['Détecte cycles négatifs', 'O(V*E)', 'Les deux', 'Plus lent que Dijkstra'], 2, 'Les deux', 'Bellman-Ford : relaxe toutes arêtes |V|-1 fois.\nSi encore relaxation au tour |V|, cycle négatif existe.\nO(V*E), plus lent que Dijkstra mais gère poids négatifs.', '// Bellman-Ford : poids négatifs + cycle detection = O(V*E)'),
+
+# Jour 314 — ALGO
+('ALGO', 'Floyd-Warshall', 'All pairs shortest paths', 'Tous les chemins entre tous', ['DP[i][j][k]', 'O(V³)', 'Les deux', 'DP 3D'], 2, 'Les deux', 'Floyd : pour chaque paire (i,j), essayer via k.\nDP[i][j] = min(DP[i][j], DP[i][k] + DP[k][j]).\nO(V³), pratique si graphe dense.', '// Floyd-Warshall : all pairs via DP = O(V³)'),
+
+# Jour 316 — ALGO
+('ALGO', 'Kruskal MST', 'Minimum Spanning Tree', 'Arêtes par poids croissant', ['Sort edges + Union-Find', 'Greedy', 'O(E log E)', 'Tout ça'], 3, 'Tout ça', 'Kruskal : trier arêtes, ajouter si pas de cycle (DSU).\nGreedy : arête min qui connecte 2 composantes.\nO(E log E) pour tri, DSU quasi O(1).', '// Kruskal : sort edges + DSU = O(E log E)'),
+
+# Jour 318 — ALGO
+('ALGO', 'Prim MST', 'MST avec heap', 'Start from 1 node', ['Priority queue + visited', 'Greedy', 'O((V+E) log V)', 'Tout ça'], 3, 'Tout ça', 'Prim : heap avec arêtes sortantes, toujours ajouter min.\nGreedy : arête min vers nœud non visité.\nO((V+E) log V) avec heap.', '// Prim : min-heap greedy = O((V+E) log V)'),
+
+# Jour 320 — ALGO
+('ALGO', 'Tarjan SCC', 'Strongly Connected Components', 'DFS + low-link', ['Stack + DFS order', 'O(V+E)', 'Complexe', 'Tout ça'], 3, 'Tout ça', 'Tarjan : DFS avec low-link (plus bas ancêtre atteignable).\nStack pour tracker current SCC.\nO(V+E) un seul passage.', '// Tarjan : DFS + low-link + stack = O(V+E)'),
+
+# Jour 322 — ALGO
+('ALGO', 'Kosaraju SCC', 'Alternative SCC', '2 DFS passes', ['DFS + reverse graph + DFS', 'O(V+E)', 'Plus simple', 'Tout ça'], 3, 'Tout ça', 'Kosaraju : DFS sur graphe original (ordre finish).\nDFS sur graphe inversé en ordre décroissant.\nO(V+E), plus simple que Tarjan.', '// Kosaraju : 2 DFS (original + reverse) = O(V+E)'),
+
+# Jour 324 — ALGO
+('ALGO', 'Articulation Points', 'Cut vertices', 'Retirer → composantes augmentent', ['DFS + low-link', 'Bridges similaire', 'O(V+E)', 'Tout ça'], 3, 'Tout ça', 'Articulation point : retirer → graphe se déconnecte.\nDFS + low-link : si low[child] ≥ disc[u] → u est point.\nO(V+E).', '// Articulation : DFS + low-link (cut vertex) = O(V+E)'),
+
+# Jour 326 — ALGO
+('ALGO', 'Eulerian Path', 'Parcourir toutes arêtes 1 fois', 'Conditions degree', ['≤ 2 nœuds degree impair', 'Connecté', 'Les deux', 'Conditions précises'], 2, 'Les deux', 'Eulerian path : exactement 0 ou 2 nœuds de degré impair.\nEulerian circuit : tous degrés pairs.\nGraphe doit être connecté.', '// Eulerian : 0 ou 2 odd degree = path | 0 = circuit'),
+
+# Jour 328 — ALGO
+('ALGO', 'Hamiltonian Path', 'Visiter tous nœuds 1 fois', 'NP-Complete', ['Backtracking', 'DP bitmask O(2^n * n²)', 'Pas de poly', 'Tout ça'], 3, 'Tout ça', "Hamiltonian : NP-Complete, pas d'algo polynomial connu.\nBacktracking : O(n!).\nDP bitmask : O(2^n * n²), meilleur mais exponentiel.", '// Hamiltonian : NP-Complete (backtrack ou DP bitmask)'),
+
+# Jour 330 — ALGO
+('ALGO', 'Traveling Salesman', 'Plus court cycle visitant tous', 'NP-Hard', ['DP bitmask O(2^n * n²)', 'Approx algorithms', 'Greedy suboptimal', 'DP optimal exact'], 3, 'DP optimal exact', 'TSP exact : DP bitmask O(2^n * n²).\nApproximations : Christofides 1.5-approx, greedy, etc.\nNP-Hard, pas de poly exact.', '// TSP : DP bitmask exact O(2^n * n²) ou approx'),
+
+# Jour 332 — ALGO
+('ALGO', 'KMP pattern matching', 'Éviter recomparaisons', 'Précompute LPS array', ['Longest Prefix Suffix', 'O(n+m)', 'Skip characters', 'Tout ça'], 3, 'Tout ça', 'KMP : LPS array = longest proper prefix qui est aussi suffix.\nPas de backtrack dans texte, seulement pattern.\nO(n+m) vs O(n*m) naïf.', '// KMP : LPS array pour skip = O(n+m)'),
+
+# Jour 334 — ALGO
+('ALGO', 'Rabin-Karp rolling hash', 'Pattern matching avec hash', 'Hash window de taille m', ['Rolling hash O(1)', 'Collisions possibles', 'O(n+m) average', 'Tout ça'], 3, 'Tout ça', 'Rabin-Karp : hash fenêtre glissante.\nRolling hash : update en O(1) (retirer gauche, ajouter droite).\nCollisions → vérifier match. O(n+m) moyen.', '// Rabin-Karp : rolling hash O(1) = O(n+m) average'),
+
+# Jour 336 — ALGO
+('ALGO', 'Boyer-Moore string search', 'Sauts avec bad character', 'Skip characters', ['Bad char + good suffix', 'O(n/m) best', 'Plus rapide en pratique', 'Tout ça'], 3, 'Tout ça', "Boyer-Moore : compare de droite à gauche.\nBad char rule : skip jusqu'à match ou dépassement.\nMeilleur cas O(n/m), pratique très rapide.", '// Boyer-Moore : bad char rule = O(n/m) best case'),
+
+# Jour 338 — ALGO
+('ALGO', 'Aho-Corasick multi-pattern', 'Chercher plusieurs patterns', 'Trie + fail links', ['Automate fini', 'O(n + m + z)', 'Multi-pattern optimal', 'Tout ça'], 3, 'Tout ça', 'Aho-Corasick : Trie de patterns + fail links (comme KMP).\nUn seul passage dans texte pour tous patterns.\nO(n + m + z) avec z = nb matches.', '// Aho-Corasick : trie + fail links = multi-pattern O(n+m+z)'),
+
+# Jour 340 — ALGO
+('ALGO', 'Suffix Array', 'Tous suffixes triés', 'Alternative suffix tree', ['Indices triés par suffixes', 'O(n log n) construction', 'O(m log n) search', 'Tout ça'], 3, 'Tout ça', 'Suffix array : indices de tous suffixes triés lexicographiquement.\nConstruction : O(n log² n) naïf, O(n log n) optimal.\nSearch pattern : O(m log n) avec binary search.', '// Suffix array : sorted suffixes = space-efficient suffix tree'),
+
+# Jour 342 — ALGO
+('ALGO', 'Z-algorithm', 'Z[i] = longest prefix match', 'Linear time string matching', ['Z-box optimization', 'O(n)', 'Simple à implémenter', 'Tout ça'], 3, 'Tout ça', 'Z-algorithm : Z[i] = longueur du plus long préfixe commun.\nZ-box : réutilise info précédente pour skip.\nO(n), simple et efficace.', '// Z-algorithm : Z-box reuse = O(n) simple'),
+
+# Jour 344 — ALGO
+('ALGO', 'Trapping Rain Water', 'Eau piégée entre barres', 'height = [0,1,0,2,1,0,1,3,2,1,2,1]', ['Two pointers', 'Prefix/suffix max', 'Stack', 'Two pointers optimal'], 3, 'Two pointers optimal', 'Two pointers : left/right avec max_left/max_right.\nEau[i] = min(max_left, max_right) - height[i].\nO(n) temps, O(1) espace.', '// Rain water : two pointers + max tracking = O(n) O(1)'),
+
+# Jour 346 — ALGO
+('ALGO', 'Candy greedy', 'Distribution avec contraintes', 'ratings = [1,0,2]\nVoisins ratings', ['Two passes greedy', 'DP', 'Heap', 'Greedy optimal'], 3, 'Greedy optimal', 'Greedy : passe gauche→droite (si > gauche, +1 candy).\nPasse droite→gauche (si > droite, max(current, right+1)).\nO(n) temps.', '// Candy : two-pass greedy (left + right) = O(n)'),
+
+# Jour 348 — ALGO
+('ALGO', 'Gas Station greedy', 'Peut faire le tour ?', 'gas[], cost[]\nStart index', ['Greedy one-pass', 'Brute force', 'DP', 'Greedy optimal'], 3, 'Greedy optimal', 'Greedy : track tank et total.\nSi tank < 0, reset start à i+1.\nSi total ≥ 0 à la fin, solution existe.\nO(n) temps.', '// Gas station : greedy track tank + total = O(n)'),
+
+# Jour 350 — ALGO
+('ALGO', 'Jump Game II', 'Min sauts pour atteindre fin', 'nums = [2,3,1,1,4]', ['Greedy range', 'DP', 'BFS', 'Greedy optimal'], 3, 'Greedy optimal', 'Greedy : track currentEnd et farthest.\nQuand i atteint currentEnd, jump++.\nO(n) temps.', '// Jump II : greedy range (currentEnd + farthest) = O(n)'),
+
+# Jour 352 — ALGO
+('ALGO', 'N-Queens backtracking', 'Placer N reines', 'N x N board\nNo attacks', ['Backtracking + pruning', 'DP', 'Greedy', 'Backtracking classique'], 3, 'Backtracking classique', 'Backtracking : placer reine par ligne.\nPruning : vérifier colonnes, diagonales.\nO(N!) complexité.', '// N-Queens : backtracking + diagonal checks = O(N!)'),
+
+# Jour 354 — ALGO
+('ALGO', 'Sudoku Solver', 'Remplir grille 9x9', 'Backtracking avec contraintes', ['Backtracking + validation', 'Brute force', 'Greedy', 'Backtracking optimal'], 3, 'Backtracking optimal', 'Backtracking : essayer 1-9 pour chaque case vide.\nValidation : row, col, 3x3 box.\nExponentiel mais pruning efficace.', '// Sudoku : backtracking + row/col/box checks'),
+
+# Jour 356 — ALGO
+('ALGO', 'Wildcard Matching DP', '? et * wildcards', 's = "aa"\np = "*"', ['DP[i][j] avec * = 0+', 'Greedy', 'Backtracking', 'DP complexe'], 3, 'DP complexe', 'DP : ? = match 1, * = match 0+.\nÉtats avec * (skip ou match 1+).\nO(n*m) temps.', '// Wildcard DP : ? = 1 char, * = 0+ chars = O(n*m)'),
+
+# Jour 358 — ALGO
+('ALGO', 'Interleaving String DP', 's3 = interleave(s1, s2)', 's1 = "aabcc"\ns2 = "dbbca"\ns3 = "aadbbcbcac"', ['DP[i][j] = interleave(s1[:i], s2[:j])', 'Greedy', 'Two pointers', 'DP optimal'], 3, 'DP optimal', 'DP : DP[i][j] = true si s3[:i+j] peut être formé.\nTransition : match s1[i] ou s2[j].\nO(n*m) temps.', '// Interleaving : DP match s1 or s2 = O(n*m)'),
+
+# Jour 360 — ALGO
+('ALGO', 'Palindrome Partitioning II', 'Min cuts pour all palindromes', 's = "aab"', ['DP cuts + DP palindrome', 'Greedy', 'Backtracking', 'DP 2-phase'], 3, 'DP 2-phase', 'Phase 1 : DP pour détecter palindromes O(n²).\nPhase 2 : DP cuts[i] = min cuts pour s[:i].\nO(n²) temps.', '// Palindrome partition : DP palindrome + DP cuts = O(n²)'),
+
+# Jour 362 — ALGO
+('ALGO', 'Russian Doll Envelopes', 'LIS en 2D', 'Enveloppes (w, h)\nNested', ['Sort + LIS on height', 'DP 2D', 'Greedy', 'LIS optimal'], 3, 'LIS optimal', 'Trier par w croissant (si égal, h décroissant).\nLIS sur hauteurs → O(n log n).\nAstuces : h décroissant évite w égaux.', '// Envelopes : sort w + LIS h = O(n log n)'),
+
+# Jour 364 — ALGO
+('ALGO', 'Min Window Substring optimal', 'Template générique', 's, t → min window contenant t', ['Sliding window + 2 freq maps', 'Brute force', 'DP', 'Window template'], 3, 'Window template', 'Template : expand right, shrink left quand valide.\nFreq map pour t, counter pour matches.\nO(n+m) optimal.', '// Min window : sliding window template = O(n+m)'),
+
 ]

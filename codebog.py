@@ -23,7 +23,7 @@ if sys.platform == 'win32':
     sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'strict')
 
 # Imports locaux (nouvelle architecture)
-from config import OUTPUT_DIR
+from config import OUTPUT_DIR, EMOJI_UNICODE
 from data import build_schedule
 from generators import generate_image, generate_post_text
 
@@ -139,7 +139,7 @@ def generate_post(post, output_dir):
     print(f"\n{'─'*70}")
     print(f"  [{day:03d}] {post['type']} · {post['topic']}")
     print(f"{'─'*70}")
-    print(f"\n✅ Réponse : {post['correct_emoji']} {post['answer']}")
+    print(f"\n✅ Réponse : {EMOJI_UNICODE[post['correct_emoji']]} {post['answer']}")
     print(f"\n💡 Explication :")
     for line in post['explanation'].split('\n'):
         print(f"   {line}")
