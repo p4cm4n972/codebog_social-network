@@ -14,7 +14,7 @@ Usage:
 import argparse
 import os
 import sys
-from datetime import date, timedelta
+from datetime import date
 
 # Forcer l'encodage UTF-8 pour Windows
 if sys.platform == 'win32':
@@ -25,7 +25,7 @@ if sys.platform == 'win32':
 # Imports locaux (nouvelle architecture)
 from config import OUTPUT_DIR, EMOJI_UNICODE
 from data import build_schedule
-from generators import generate_image, generate_post_text
+from generators import generate_image
 
 
 def main():
@@ -108,7 +108,7 @@ def preview_post(post):
 
 def generate_post(post, output_dir):
     """
-    Génère l'image et le texte pour un post.
+    Génère l'image pour un post.
 
     Args:
         post: Dictionnaire avec les données du post
@@ -117,23 +117,11 @@ def generate_post(post, output_dir):
     day = post['day']
     type_label = post['type'].lower()
 
-    # Nom des fichiers
+    # Nom du fichier
     img_path = os.path.join(output_dir, f"day_{day:03d}_{type_label}.png")
-    txt_path = os.path.join(output_dir, f"day_{day:03d}_{type_label}.txt")
 
     # Générer l'image
     generate_image(post, img_path)
-
-    # Générer le texte
-    text = generate_post_text(
-        (post['type'], post['topic'], post['hook'], post['code'],
-         list(post['options'].values()), list(post['options'].keys()).index(post['correct_emoji']),
-         post['answer'], post['explanation'], post['tip']),
-        day
-    )
-
-    with open(txt_path, 'w', encoding='utf-8') as f:
-        f.write(text)
 
     # Affichage formaté du résultat
     print(f"\n{'─'*70}")
@@ -151,25 +139,9 @@ def generate_post(post, output_dir):
     else:
         print(f"\n👉 Apprends l'algo : learning.itmade.fr")
 
-    print(f"\n📁 Fichiers générés :")
+    print(f"\n📁 Fichier généré :")
     print(f"   - {img_path}")
-    print(f"   - {txt_path}")
     print(f"{'─'*70}\n")
-
-
-def show_stats():
-    """Affiche les statistiques du calendrier."""
-    schedule = build_schedule()
-    js_count = sum(1 for p in schedule if p['type'] == 'JS')
-    algo_count = sum(1 for p in schedule if p['type'] == 'ALGO')
-
-    print(f"📊 Statistiques Codebog")
-    print(f"   Total posts    : {len(schedule)}")
-    print(f"   Posts JS       : {js_count}")
-    print(f"   Posts ALGO     : {algo_count}")
-    print(f"   Phases         : 4 (90 jours chacune)")
-    print(f"   Date début     : {schedule[0]['date']}")
-    print(f"   Date fin       : {schedule[-1]['date']}")
 
 
 if __name__ == "__main__":
