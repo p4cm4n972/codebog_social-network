@@ -1535,7 +1535,19 @@ def generate_image(post, output_path):
     # Code font : adapté au nombre de lignes
     code_lines = post['code'].split('\n')
     nl = len(code_lines)
-    code_sz = 64 if nl == 1 else (52 if nl <= 3 else (40 if nl <= 6 else 30))
+    max_line_len = max(len(line) for line in code_lines)
+
+    # Ajuster selon la longueur pour eviter debordements
+    if nl == 1:
+        if max_line_len > 50:
+            code_sz = 22
+        elif max_line_len > 40:
+            code_sz = 24
+        elif max_line_len > 30:
+            code_sz = 24
+            code_sz = 48
+    else:
+        code_sz = 52 if nl <= 3 else (40 if nl <= 6 else 30)
     f_code = _lf("DejaVuSansMono.ttf", code_sz)
 
     M  = 32   # marge gauche/droite
@@ -1593,7 +1605,14 @@ def generate_image(post, output_path):
     PAD_V   = 28                                        # padding haut/bas code
     code_area_available = available_th - TB_H - 2 * PAD_V
     line_h  = max(30, code_area_available // nl)        # hauteur par ligne
-    code_sz = min(64, max(22, int(line_h * 0.80)))      # taille de police clampée
+    # Limiter selon hauteur ET longueur de ligne
+    code_sz_height = min(64, max(22, int(line_h * 0.80)))
+    # Limiter selon longueur de ligne pour éviter débordement
+    if nl == 1 and max_line_len > 30:
+        code_sz_width = 36 if max_line_len > 40 else 40
+        code_sz = min(code_sz_height, code_sz_width)
+    else:
+        code_sz = code_sz_height
     f_code  = _lf("DejaVuSansMono.ttf", code_sz)
 
     # Recalcul de la hauteur réelle avec la taille de police choisie
