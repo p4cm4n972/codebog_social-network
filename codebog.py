@@ -40,8 +40,9 @@ def main():
     # Créer le dossier de sortie
     os.makedirs(args.output, exist_ok=True)
 
-    # Construire le calendrier
-    schedule = build_schedule()
+    # Construire le calendrier (ignore la limite de date pour --day ou --all)
+    ignore_date_limit = args.day is not None or args.all
+    schedule = build_schedule(ignore_end_date=ignore_date_limit)
 
     if args.all:
         print(f"Génération de {len(schedule)} posts...")
