@@ -552,4 +552,8 @@ JS_CHALLENGES = [
 # Jour 365 — JS
 ('JS', 'Records & Tuples', 'Immutabilité profonde ?', 'const rec = #{ a: 1, b: 2 }\nconst tup = #[1, 2, 3]', ['Proposition immutables', 'Déjà standard', 'Syntaxe invalide', 'Aucun'], 0, 'Proposition immutables', 'Records (#{ }) et Tuples (#[ ]) sont des structures immutables.\nProposition TC39 (stage 2).\nComparaison par valeur (pas par référence).', '// Records/Tuples : immutables, comparison par valeur (stage 2)'),
 
+
+# Jour 366 — JS (Bonus #011)
+('JS', 'bind() et arrow functions', 'bind() va fixer ce bug... vraiment ?', 'const user = {\n  name: "Boggy",\n  sayBye: () => this.name\n}\n\nconst fn = user.sayBye.bind(user)\nconsole.log(fn())', ['"Boggy"', 'undefined', 'TypeError', '"Boggy" après bind'], 1, 'undefined', 'bind() est SANS EFFET sur une arrow function.\nLe this est capturé à la création, pour toujours.\nMême bind(), call() et apply() ne peuvent pas le changer.', '// Le fix : utiliser function() { return this.name }'),
+
 ]

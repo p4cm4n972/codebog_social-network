@@ -1556,7 +1556,7 @@ def generate_image(post, output_path):
     # 1. BADGES (y: 34 → 102)
     # ══════════════════════════════════════════════
     badge_l = "JS CHALLENGE" if is_js else "ALGO CHALLENGE"
-    badge_r = f"#{post['day']:03d} / 365"
+    badge_r = "BONUS" if post['day'] > 365 else f"#{post['day']:03d} / 365"
     badge_l_em = "[JS]" if is_js else "[ALGO]"  # fallback sans emoji
 
     # Badge gauche
