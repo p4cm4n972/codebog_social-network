@@ -1607,12 +1607,17 @@ def generate_image(post, output_path):
     line_h  = max(30, code_area_available // nl)        # hauteur par ligne
     # Limiter selon hauteur ET longueur de ligne
     code_sz_height = min(64, max(22, int(line_h * 0.80)))
-    # Limiter selon longueur de ligne pour éviter débordement
-    if nl == 1 and max_line_len > 30:
-        code_sz_width = 36 if max_line_len > 40 else 40
-        code_sz = min(code_sz_height, code_sz_width)
+    # Limiter selon longueur de ligne pour éviter débordement (toutes lignes)
+    if max_line_len > 50:
+        code_sz_width = 28  # Très long
+    elif max_line_len > 40:
+        code_sz_width = 36  # Long
+    elif max_line_len > 30:
+        code_sz_width = 40  # Moyen
     else:
-        code_sz = code_sz_height
+        code_sz_width = code_sz_height  # Pas de limite
+
+    code_sz = min(code_sz_height, code_sz_width)
     f_code  = _lf("DejaVuSansMono.ttf", code_sz)
 
     # Recalcul de la hauteur réelle avec la taille de police choisie
